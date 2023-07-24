@@ -7,6 +7,8 @@ import (
 	"time"
 )
 
+var Markets []string
+
 var Coins []tradableMarket
 
 type tradableMarket struct {
@@ -42,6 +44,14 @@ func getAvailableCoins() {
 	err = json.Unmarshal(body, &Coins)
 	if err != nil {
 		panic(err)
+	}
+
+	// 원화 마켓만 리스트 업데이트
+	for _, coin := range Coins {
+
+		if coin.Market[0:3] == "KRW" {
+			Markets = append(Markets, coin.Market)
+		}
 	}
 
 }

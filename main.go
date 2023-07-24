@@ -1,23 +1,25 @@
 package main
 
 import (
-	"fmt"
-	"github.com/gin-gonic/gin"
 	"upbit-api/config"
-	"upbit-api/internal/handlers"
+	"upbit-api/internal/connect"
 )
 
 func main() {
 
+	// 전역변수 초기화
 	config.Init()
 
-	fmt.Println(len(config.Coins))
+	// 업비트 웹소켓 연결
+	connect.Socket()
 
-	r := gin.Default()
-	rAPI := r.Group("/api")
+	//fmt.Println(len(config.Coins))
 
-	rAPI.GET("/accounts", handlers.Accounts)
-	rAPI.GET("/마켓코드조회", handlers.AllMarketCodes)
-	r.Run()
+	//r := gin.Default()
+	//rAPI := r.Group("/api")
+	//
+	//rAPI.GET("/accounts", handlers.Accounts)
+	//rAPI.GET("/마켓코드조회", handlers.AllMarketCodes)
+	//r.Run()
 
 }

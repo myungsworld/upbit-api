@@ -6,6 +6,10 @@ import (
 	"os"
 )
 
+const (
+	UpbitWebSocketURL = "wss://api.upbit.com/websocket/v1"
+)
+
 var AccessKey string
 var SecretKey string
 
@@ -21,5 +25,7 @@ func Init() {
 
 	// 주문가능 코인들 가져오기
 	getAvailableCoins()
+
+	//
 
 }
