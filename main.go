@@ -1,11 +1,18 @@
 package main
 
 import (
+	"github.com/joho/godotenv"
+	"log"
 	"upbit-api/config"
 	"upbit-api/internal/connect"
 )
 
 func main() {
+
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file:", err)
+	}
 
 	// 전역변수 초기화
 	config.Init()

@@ -7,8 +7,6 @@ import (
 	"time"
 )
 
-var Markets []string
-
 var Coins []tradableMarket
 
 type tradableMarket struct {
@@ -50,7 +48,12 @@ func getAvailableCoins() {
 	for _, coin := range Coins {
 
 		if coin.Market[0:3] == "KRW" {
-			Markets = append(Markets, coin.Market)
+			if coin.Market == "KRW-BTT" || coin.Market == "KRW-SHIB" {
+				// 가격이 너무 낮아서 변동률이 너무 커서 제외
+			} else {
+				Markets = append(Markets, coin.Market)
+			}
+
 		}
 	}
 
