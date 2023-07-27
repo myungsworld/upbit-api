@@ -25,8 +25,9 @@ func main() {
 		// 모든 코인 조회후 가장 하락률 높은 코인 기준으로 리스트 가져오기
 		getFallenCoins()
 
-		time.Sleep(time.Second)
-		fmt.Println("끝!")
+		// 사는거 구현해야함
+		// buyFallenCoins()
+
 		// 다음 날 오전 8시 59분으로 타이머 재설정
 		timeReset(timer)
 	}
@@ -34,8 +35,8 @@ func main() {
 }
 
 func startAt() *time.Timer {
-	now := time.Now()
-	startTime := time.Date(now.Year(), now.Month(), now.Day(), 15, 52, 00, 0, now.Location())
+	startTime := time.Now().Add(time.Second)
+	//startTime := time.Date(now.Year(), now.Month(), now.Day(), 15, 52, 00, 0, now.Location())
 	// 오전 8시 59분일때 실행
 	duration := startTime.Sub(time.Now())
 	// 이미 지난 경우 다음날 8시 59분 실행
@@ -122,8 +123,9 @@ func getFallenCoins() []models.Ticker {
 
 	}
 
+	// TODO : 시발 이거 안먹힘 ㅡㅡ
 	sort.Slice(minusResult, func(i, j int) bool {
-		return minusResult[i].SignedChangeRate < minusResult[i].SignedChangeRate
+		return minusResult[i].ChangeRate > minusResult[i].ChangeRate
 	})
 
 	for i := 0; i < len(minusResult); i++ {

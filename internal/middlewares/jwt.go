@@ -9,25 +9,22 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"os"
 	"upbit-api/config"
 )
 
-// Authentication
 // 업비트 JWT 인증토큰 발급방법
 // https://docs.upbit.com/docs/create-authorization-request
-func Authentication() string {
-	accessKey := os.Getenv("AccessKey")
-	secretKey := os.Getenv("SecretKey")
+
+func CreateTokenWithNoParams() string {
 
 	payload := jwt.MapClaims{
-		"access_key": accessKey,
+		"access_key": config.AccessKey,
 		"nonce":      uuid.New().String(),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, payload)
 
-	tokenString, err := token.SignedString([]byte(secretKey))
+	tokenString, err := token.SignedString([]byte(config.SecretKey))
 	if err != nil {
 		fmt.Println("Error generating JWT token:", err)
 		panic(err)
@@ -35,7 +32,33 @@ func Authentication() string {
 
 	// Construct the authorization token
 	authorizationToken := "Bearer " + tokenString
-	fmt.Println("Authorization Token:", authorizationToken)
+
+	return authorizationToken
+}
+
+func CreateTokenWithParams(query string) string {
+
+	hash := sha512.New()
+	hash.Write([]byte(query))
+	queryHash := hex.EncodeToString(hash.Sum(nil))
+
+	payload := jwt.MapClaims{
+		"access_key":     config.AccessKey,
+		"nonce":          uuid.New().String(),
+		"query_hash":     queryHash,
+		"query_hash_alg": "SHA512",
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, payload)
+	tokenString, err := token.SignedString([]byte(config.SecretKey))
+	if err != nil {
+		fmt.Println("Error generating JWT token:", err)
+		panic(err)
+	}
+
+	// Construct the authorization token
+	authorizationToken := "Bearer " + tokenString
+
 	return authorizationToken
 }
 
