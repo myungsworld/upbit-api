@@ -38,6 +38,9 @@ func CreateTokenWithNoParams() string {
 
 func CreateTokenWithParams(query string) string {
 
+	fmt.Println(query)
+	// query string 값 : market=KRW-BTC&ord_type=price&price=5000&side=bid
+
 	hash := sha512.New()
 	hash.Write([]byte(query))
 	queryHash := hex.EncodeToString(hash.Sum(nil))

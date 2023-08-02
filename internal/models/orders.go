@@ -26,12 +26,19 @@ const (
 )
 
 type Order struct {
-	Market     string `json:"market" binding:"required" example:"KRW-BTC"` // 마켓 ID
-	Side       string `json:"side" binding:"required"`                     // 주문 종류
-	Volume     string `json:"volume"`                                      // 주문량 (지정가, 시장가 매도 시 필수)
-	Price      string `json:"price"`
-	OrdType    string `json:"ord_type"`
-	Identifier string `json:"identifier"`
+	Market     string  `json:"market" binding:"required" example:"KRW-BTC"` // 마켓 ID
+	Side       string  `json:"side" binding:"required"`                     // 주문 종류
+	Volume     *string `json:"volume"`                                      // 주문량 (지정가, 시장가 매도 시 필수)
+	Price      string  `json:"price"`
+	OrdType    string  `json:"ord_type"`
+	Identifier string  `json:"identifier"`
+}
+
+type BidOrder struct {
+	Market  string `json:"market" binding:"required" example:"KRW-BTC"` // 마켓 ID
+	OrdType string `json:"ord_type"`
+	Price   string `json:"price"`
+	Side    string `json:"side" binding:"required"` // 주문 종류
 }
 
 type Market string
@@ -40,29 +47,24 @@ type Market string
 func (m Market) BidMarketPrice(amount string) {
 
 	request(
-		Order{
+		BidOrder{
 			string(m),
-			buy,
-			"",
-			amount,
 			marketPriceBuy,
-			"",
+			amount,
+			buy,
 		},
 	)
 
 }
 
-func request(order Order) {
+func request(order BidOrder) {
 
 	body := url.Values{}
 
 	body.Set("market", order.Market)
 	body.Set("side", order.Side)
-	body.Set("volume", order.Volume)
 	body.Set("price", order.Price)
 	body.Set("ord_type", order.OrdType)
-
-	fmt.Println(body)
 
 	query := body.Encode()
 
@@ -70,11 +72,7 @@ func request(order Order) {
 
 	client := &http.Client{}
 
-	fmt.Println("---")
-	fmt.Println(query)
-	fmt.Println("---")
-
-	b, _ := json.Marshal(order)
+	b, _ := json.Marshal(&order)
 
 	req, err := http.NewRequest(http.MethodPost, orderUrl, bytes.NewBuffer(b))
 	if err != nil {
@@ -82,6 +80,7 @@ func request(order Order) {
 		panic(err)
 	}
 	req.Header.Add("Authorization", authorizationToken)
+	req.Header.Add("Content-Type", "application/json")
 	resp, err := client.Do(req)
 	if err != nil {
 		fmt.Println("Error sending request:", err)
@@ -94,4 +93,5 @@ func request(order Order) {
 		panic(err)
 	}
 	fmt.Println(string(respBody))
+	// {"error":{"message":"Failed to verify the query of Jwt.","name":"invalid_query_payload"}}
 }
