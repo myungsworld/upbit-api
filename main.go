@@ -1,20 +1,21 @@
 package main
 
 import (
+	"fmt"
 	"github.com/joho/godotenv"
 	"log"
 	"upbit-api/config"
-	"upbit-api/internal/models"
+	"upbit-api/internal/api/accounts"
 )
 
 func main() {
 
-	coin := models.Market("KRW-BTC")
-
-	coin.BidMarketPrice("5000")
+	// 코인 매수
+	//coin := models.Market("KRW-BTC")
+	//coin.BidMarketPrice("5000")
 
 	// 전체 계좌 리스트 가져오기
-	//accounts.Index()
+	fmt.Println(accounts.GetAvailableKRW())
 
 	// 업비트 웹소켓 연결
 	//connect.Socket()

@@ -92,6 +92,13 @@ func request(order BidOrder) {
 	if err != nil {
 		panic(err)
 	}
+
+	if resp.StatusCode == 201 {
+		fmt.Println("%s 매수체결","이름이름 코인")
+	} else {
+		fmt.Println("매수 실패 사유", string(respBody))
+	}
+
 	fmt.Println(string(respBody))
-	// {"error":{"message":"Failed to verify the query of Jwt.","name":"invalid_query_payload"}}
+
 }

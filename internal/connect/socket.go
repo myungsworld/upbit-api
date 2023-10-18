@@ -52,6 +52,6 @@ func subscribeToMarketData(conn *websocket.Conn) error {
 		return err
 	}
 
-	fmt.Printf("Subscribed to market data for %s\n", markets)
+	fmt.Printf("코인 %d개 모니터링 소켓 시작\n", len(config.Markets))
 	return nil
 }

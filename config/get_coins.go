@@ -48,8 +48,8 @@ func getAvailableCoins() {
 	for _, coin := range Coins {
 
 		if coin.Market[0:3] == "KRW" {
+			// 아래 코인 가격이 너무 낮아 변동률이 커서 제외
 			if coin.Market == "KRW-BTT" || coin.Market == "KRW-SHIB" {
-				// 가격이 너무 낮아서 변동률이 너무 커서 제외
 			} else {
 				Markets = append(Markets, coin.Market)
 			}
