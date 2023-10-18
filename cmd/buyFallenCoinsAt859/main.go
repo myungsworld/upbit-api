@@ -6,16 +6,18 @@ import (
 	"github.com/joho/godotenv"
 	"log"
 	"sort"
+	"strconv"
 	"time"
 	"upbit-api/config"
+	"upbit-api/internal/api/accounts"
 	"upbit-api/internal/connect"
 	"upbit-api/internal/models"
 )
 
-// 오전 8시 59분 ( UTC 기준 자정, 이전에 가장 많이 하락한 코인 구입 )
+// 오전 8시 59분 ( UTC 기준 자정 기준 가장 많이 하락한 코인 구입 )
 func main() {
 
-	log.Println("오전 8시 59분 ( UTC 기준 자정, 이전에 가장 많이 하락한 코인 구입 ) 프로그램 시작")
+	log.Println("( UTC 기준 자정 기준 가장 많이 하락한 코인 구입 ) 프로그램 시작")
 
 	// 시작 시간 설정
 	timer := startAt()
@@ -23,10 +25,26 @@ func main() {
 	for {
 		<-timer.C
 		// 모든 코인 조회후 가장 하락률 높은 코인 기준으로 리스트 가져오기
-		getFallenCoins()
+		tickers := getFallenCoins()
+
+		purchaseAmountStr := "6000"
+		buyTickers := tickers[:1]
+
+		purchaseAmount, _ := strconv.Atoi(purchaseAmountStr)
+
+		// 총 현금보다 적으면 못삼
+		if accounts.GetAvailableKRW() < purchaseAmount*len(buyTickers) {
+			fmt.Println("현재 가지고 있는 한화:", accounts.GetAvailableKRW(), "원")
+			fmt.Println("주문 가능 금액:", purchaseAmount*len(buyTickers), "원")
+		} else {
+			for _, ticker := range buyTickers {
+				coin := models.Market(ticker.Code)
+				coin.BidMarketPrice(purchaseAmountStr)
+			}
+		}
 
 		// 사는거 구현해야함
-		// buyFallenCoins()
+		// buyFallenCoinsAt859()
 
 		// 다음 날 오전 8시 59분으로 타이머 재설정
 		timeReset(timer)
@@ -36,7 +54,7 @@ func main() {
 
 func startAt() *time.Timer {
 	startTime := time.Now().Add(time.Second)
-	//startTime := time.Date(now.Year(), now.Month(), now.Day(), 15, 52, 00, 0, now.Location())
+	//startTime := time.Date(now.Year(), now.Month(), now.Day(), 8, 59, 00, 0, now.Location())
 	// 오전 8시 59분일때 실행
 	duration := startTime.Sub(time.Now())
 	// 이미 지난 경우 다음날 8시 59분 실행
@@ -88,7 +106,7 @@ func getFallenCoins() []models.Ticker {
 	conn := connect.Socket()
 
 	tickers := make(map[string]models.Ticker, 0)
-
+	arrTickers := make([]models.Ticker, 0)
 	for {
 
 		_, message, err := conn.ReadMessage()
@@ -98,7 +116,6 @@ func getFallenCoins() []models.Ticker {
 		}
 
 		ticker := models.Ticker{}
-		//fmt.Printf("Received message: %s\n", message)
 		if err := json.Unmarshal(message, &ticker); err != nil {
 			panic(err)
 		}
@@ -106,6 +123,7 @@ func getFallenCoins() []models.Ticker {
 		_, ok := tickers[ticker.Code]
 		if !ok {
 			tickers[ticker.Code] = ticker
+			arrTickers = append(arrTickers, ticker)
 		}
 
 		if len(tickers) == len(config.Markets) {
@@ -114,24 +132,14 @@ func getFallenCoins() []models.Ticker {
 
 	}
 
-	var minusResult []models.Ticker
-
-	for _, ticker := range tickers {
-		if ticker.Change == "FALL" {
-			minusResult = append(minusResult, ticker)
-		}
-
-	}
-
-	// TODO : 시발 이거 안먹힘 ㅡㅡ
-	sort.Slice(minusResult, func(i, j int) bool {
-		return minusResult[i].ChangeRate > minusResult[i].ChangeRate
+	sort.Slice(arrTickers, func(i, j int) bool {
+		return arrTickers[i].SignedChangeRate < arrTickers[j].SignedChangeRate
 	})
 
-	for i := 0; i < len(minusResult); i++ {
-		fmt.Println(i, minusResult[i].Code, fmt.Sprintf("전일대비 등락률 : %f", minusResult[i].SignedChangeRate))
-	}
+	//for _, arrTicker := range arrTickers {
+	//	fmt.Println(arrTicker.Code, arrTicker.SignedChangeRate)
+	//}
 
-	return minusResult
+	return arrTickers
 
 }
