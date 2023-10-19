@@ -44,7 +44,7 @@ func main() {
 		}
 
 		// 사는거 구현해야함
-		// buyFallenCoinsAt859()
+		// lambda_deploy_buyFallenCoinsAt859()
 
 		// 다음 날 오전 8시 59분으로 타이머 재설정
 		timeReset(timer)
