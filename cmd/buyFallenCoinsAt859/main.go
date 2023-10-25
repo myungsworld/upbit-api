@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/joho/godotenv"
 	"log"
 	"sort"
 	"strconv"
@@ -91,10 +90,10 @@ func timeReset(timer *time.Timer) {
 
 func init() {
 	// .env 키 가져오기
-	err := godotenv.Load("../../.env")
-	if err != nil {
-		log.Fatal("Error loading .env file:", err)
-	}
+	//err := godotenv.Load("../../.env")
+	//if err != nil {
+	//	log.Fatal("Error loading .env file:", err)
+	//}
 
 	config.Init()
 
@@ -103,7 +102,8 @@ func init() {
 // 하락률 제일큰 코인들부터 가져오기
 func getFallenCoins() []models.Ticker {
 
-	conn := connect.Socket()
+	// 현재가 가져오는 소켓 연결
+	conn := connect.Socket(config.Ticker)
 
 	tickers := make(map[string]models.Ticker, 0)
 	arrTickers := make([]models.Ticker, 0)

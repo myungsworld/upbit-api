@@ -9,13 +9,13 @@ import (
 
 // Socket 업비트 웹소켓을 이용한 시세 수신
 // https://docs.upbit.com/docs/upbit-quotation-websocket
-func Socket() *websocket.Conn {
+func Socket(socketType string) *websocket.Conn {
 	conn, _, err := websocket.DefaultDialer.Dial(config.UpbitWebSocketURL, nil)
 	if err != nil {
 		log.Fatal("Error connecting to WebSocket:", err)
 	}
 
-	if err := subscribeToMarketData(conn); err != nil {
+	if err := subscribeToMarketData(conn, socketType); err != nil {
 		log.Fatal("Error subscribing to market data:", err)
 	}
 
@@ -31,7 +31,7 @@ func Socket() *websocket.Conn {
 	//}
 }
 
-func subscribeToMarketData(conn *websocket.Conn) error {
+func subscribeToMarketData(conn *websocket.Conn, socketType string) error {
 
 	// 마켓들 파싱
 	var markets string
@@ -42,7 +42,7 @@ func subscribeToMarketData(conn *websocket.Conn) error {
 
 	markets = markets[:len(markets)-1]
 
-	subscription := fmt.Sprintf(`[{"ticket":"test"},{"type":"ticker","codes":[%s]}]`, markets)
+	subscription := fmt.Sprintf(`[{"ticket":"myungsworld"},{"type":"%s","codes":[%s]}]`, socketType, markets)
 
 	//test := "PING"
 

@@ -1,6 +1,6 @@
 package models
 
-// Ticker
+// Ticker 현재가
 // https://docs.upbit.com/reference/websocket-ticker
 type Ticker struct {
 	Ty                 string  `json:"type"`
