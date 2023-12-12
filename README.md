@@ -21,7 +21,17 @@ go func() {
 			fmt.Println(err)
 			panic(err)
 		}
+	
+		trade := models.Trade{}
+		ticker := models.Ticker{}
+		orderbook := models.OrderBook{}
 		
+		var anyInterface interface
+		
+		if err = json.Unmarshal(message, &anyInterface); err != nil {
+			panic(err)
+        }
+        
 		// 매수 , 매도 , 모니터링 등등
     }
 }
