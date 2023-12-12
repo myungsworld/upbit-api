@@ -12,39 +12,46 @@ func init() {
 }
 ```
 
-## 웹소켓을 이용한 시세 수신()
+## 웹소켓을 이용한 시세 수신
 
 ```go
+package main
 
-# 현재가 
-conn := connect.Socket(config.Ticker)
+func main() {
 
-# 체결 
-conn := connect.Socket(config.Trade)
+	// 현재가 
+	conn := connect.Socket(config.Ticker)
 
-# 호가
-conn := connect.Socket(config.OrderBook)
+	// 체결 
+	conn := connect.Socket(config.Trade)
 
-go func() {
-	for {
-		_, message, err := conn.ReadMessage()
-		if err != nil {
-			fmt.Println(err)
-			panic(err)
+	// 호가
+	conn := connect.Socket(config.OrderBook)
+
+	// 특정 마켓만 원할시
+	conn := connect.Socket(config.Ticker, "KRW-BTC", "KRW-ETC")
+
+	go func() {
+		for {
+			_, message, err := conn.ReadMessage()
+			if err != nil {
+				fmt.Println(err)
+				panic(err)
+			}
+			ticker := models.Ticker{}
+			trade := models.Trade{}
+			orderbook := models.OrderBook{}
+
+			var anyInterface interface
+
+			if err = json.Unmarshal(message, &anyInterface); err != nil {
+				panic(err)
+			}
+
+			// 매수 , 매도 , 모니터링 등등
 		}
-	
-		trade := models.Trade{}
-		ticker := models.Ticker{}[README.md](README.md)
-		orderbook := models.OrderBook{}
-		
-		var anyInterface interface
-		
-		if err = json.Unmarshal(message, &anyInterface); err != nil {
-			panic(err)
-            }
-        
-		// 매수 , 매도 , 모니터링 등등
-    }
-}()
-
+		// 무한 루프
+		select {}
+	}()
+}
 ```
