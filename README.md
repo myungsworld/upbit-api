@@ -5,11 +5,6 @@
 .env 파일 생성후 Upbit Key 기입
 AccessKey=""
 SecretKey=""
-
-# .env 로드 , Market 상태 수집
-func init() {
-    config.Init()
-}
 ```
 
 ## 웹소켓을 이용한 시세 수신
@@ -53,5 +48,10 @@ func main() {
 		// 무한 루프
 		select {}
 	}()
+}
+
+// .env 로드 , Market 상태 수집
+func init() {
+	config.Init()
 }
 ```
