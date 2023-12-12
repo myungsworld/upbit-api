@@ -10,6 +10,13 @@ import (
 // Socket 업비트 웹소켓을 이용한 시세 수신
 // https://docs.upbit.com/docs/upbit-quotation-websocket
 func Socket(socketType string) *websocket.Conn {
+
+	// socketType 은 config 패키지의
+	// Ticker    = "ticker"
+	// Trade     = "trade"
+	// OrderBook = "orderbook"
+	// 중 하나
+
 	conn, _, err := websocket.DefaultDialer.Dial(config.UpbitWebSocketURL, nil)
 	if err != nil {
 		log.Fatal("Error connecting to WebSocket:", err)
@@ -20,15 +27,6 @@ func Socket(socketType string) *websocket.Conn {
 	}
 
 	return conn
-	// 리턴값에다가 아래 샘플 가져다가 쓰면 됨
-	//for {
-	//	_, message, err := conn.ReadMessage()
-	//	if err != nil {
-	//		log.Println("Error reading message:", err)
-	//		break
-	//	}
-	//	fmt.Printf("Received message: %s\n", message)
-	//}
 }
 
 func subscribeToMarketData(conn *websocket.Conn, socketType string) error {

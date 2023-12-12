@@ -13,10 +13,12 @@ import (
 	"upbit-api/internal/models"
 )
 
-// 오전 8시 59분 ( UTC 기준 자정 기준 가장 많이 하락한 코인 구입 )
+const PurchaseCoinNum = 3
+
+// 오전 8시 59분 ( UTC 자정 기준 업비트에서 하루동안 가장 많이 하락한 코인 구입 )
 func main() {
 
-	log.Println("( UTC 기준 자정 기준 가장 많이 하락한 코인 구입 ) 프로그램 시작")
+	log.Println("( UTC 기준 자정 기준 가장 많이 하락한 코인 구입 )")
 
 	// 시작 시간 설정
 	timer := startAt()
@@ -27,7 +29,8 @@ func main() {
 		tickers := getFallenCoins()
 
 		purchaseAmountStr := "6000"
-		buyTickers := tickers[:1]
+		// 얼마나 살지 구분
+		buyTickers := tickers[:PurchaseCoinNum]
 
 		purchaseAmount, _ := strconv.Atoi(purchaseAmountStr)
 
@@ -41,9 +44,6 @@ func main() {
 				coin.BidMarketPrice(purchaseAmountStr)
 			}
 		}
-
-		// 사는거 구현해야함
-		// lambda_deploy_buyFallenCoinsAt859()
 
 		// 다음 날 오전 8시 59분으로 타이머 재설정
 		timeReset(timer)
@@ -111,7 +111,7 @@ func getFallenCoins() []models.Ticker {
 
 		_, message, err := conn.ReadMessage()
 		if err != nil {
-			fmt.Println("소켓 캇뜨")
+			fmt.Println("소켓 닫기")
 			break
 		}
 
