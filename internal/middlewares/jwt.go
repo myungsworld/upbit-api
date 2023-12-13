@@ -36,9 +36,10 @@ func CreateTokenWithNoParams() string {
 	return authorizationToken
 }
 
+// CreateTokenWithParams JSON 순서와 인코딩된 쿼리 스트링의 순서가 동일해야함
 func CreateTokenWithParams(query string) string {
 
-	fmt.Println(query)
+	//fmt.Println(query)
 	// query string 값 : market=KRW-BTC&ord_type=price&price=5000&side=bid
 
 	hash := sha512.New()
