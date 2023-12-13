@@ -2,7 +2,9 @@ package config
 
 import (
 	"github.com/goccy/go-json"
+	"github.com/joho/godotenv"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -34,6 +36,11 @@ type tradableMarket struct {
 }
 
 func Init() {
+
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatalf("Error loading .env file")
+	}
 
 	AccessKey = os.Getenv("AccessKey")
 	SecretKey = os.Getenv("SecretKey")

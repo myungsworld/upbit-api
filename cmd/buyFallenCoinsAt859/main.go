@@ -9,11 +9,12 @@ import (
 	"time"
 	"upbit-api/config"
 	"upbit-api/internal/api/accounts"
+	"upbit-api/internal/api/orders"
 	"upbit-api/internal/connect"
 	"upbit-api/internal/models"
 )
 
-const PurchaseCoinNum = 3
+const PurchaseCoinNum = 1
 
 // 오전 8시 59분 ( UTC 자정 기준 업비트에서 하루동안 가장 많이 하락한 코인 구입 )
 func main() {
@@ -40,7 +41,7 @@ func main() {
 			fmt.Println("주문 가능 금액:", purchaseAmount*len(buyTickers), "원")
 		} else {
 			for _, ticker := range buyTickers {
-				coin := models.Market(ticker.Code)
+				coin := orders.Market(ticker.Code)
 				coin.BidMarketPrice(purchaseAmountStr)
 			}
 		}
