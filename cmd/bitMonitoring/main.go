@@ -10,7 +10,7 @@ import (
 
 func main() {
 
-	conn := connect.Socket(config.Ticker)
+	conn := connect.Socket(config.Ticker, "KRW-BTC")
 
 	go func() {
 		for {
@@ -25,8 +25,6 @@ func main() {
 			if err = json.Unmarshal(message, &ticker); err != nil {
 				panic(err)
 			}
-
-			fmt.Println(ticker)
 
 		}
 	}()

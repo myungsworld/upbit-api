@@ -45,6 +45,9 @@ func Request(endPoint string, body interface{}) interface{} {
 
 		query := requestBody.Encode()
 		token = middlewares.CreateTokenWithParams(query)
+
+	default:
+		method = http.MethodGet
 	}
 
 	client := &http.Client{}
@@ -89,8 +92,6 @@ func respHandler(endPoint string, resp *http.Response) interface{} {
 		panic(err)
 	}
 
-	fmt.Println(resp.StatusCode)
-
 	var respCode interface{}
 
 	switch resp.StatusCode {
@@ -102,6 +103,8 @@ func respHandler(endPoint string, resp *http.Response) interface{} {
 			respCode = &models.Accounts{}
 		case OrderEndPoint:
 			respCode = &models.RespOrder{}
+		default:
+			fmt.Println(string(respBody))
 		}
 	default:
 		log.Fatalf("err: %d , %v", resp.StatusCode, string(respBody))

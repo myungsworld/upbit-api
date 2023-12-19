@@ -21,6 +21,7 @@ const (
 
 var AccessKey string
 var SecretKey string
+var GmailAppPassword string
 
 // Markets
 // 비트토렌트와 시바이누 코인은 가격 변동율이 너무 커서 제외
@@ -44,6 +45,7 @@ func Init() {
 
 	AccessKey = os.Getenv("AccessKey")
 	SecretKey = os.Getenv("SecretKey")
+	GmailAppPassword = os.Getenv("GmailAppPassword")
 
 	// 주문가능 코인들 가져오기
 	getAvailableCoins()
@@ -82,8 +84,8 @@ func getAvailableCoins() {
 	for _, coin := range Coins {
 
 		if coin.Market[0:3] == "KRW" {
-			// 아래 코인 가격이 너무 낮아 변동률이 커서 제외
-			if coin.Market == "KRW-BTT" || coin.Market == "KRW-SHIB" {
+			// 아래 코인 가격이 너무 낮아 변동률이 커서 제외 및 신규 코인 제외
+			if coin.Market == "KRW-BTT" || coin.Market == "KRW-SHIB" || coin.Market == "KRW-XEC" || coin.Market == "KRW-ASTR" {
 			} else {
 				Markets = append(Markets, coin.Market)
 			}

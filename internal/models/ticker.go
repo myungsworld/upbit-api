@@ -1,5 +1,9 @@
 package models
 
+import (
+	"fmt"
+)
+
 // Ticker 현재가
 // https://docs.upbit.com/reference/websocket-ticker
 type Ticker struct {
@@ -38,4 +42,24 @@ type Ticker struct {
 	MarketWarning      string  `json:"market_warning"`
 	Timestamp          int64   `json:"timestamp"`
 	StreamType         string  `json:"stream_type"`
+}
+
+func (t Ticker) String() string {
+
+	var 억 uint16
+	var 만 uint16
+	var 원 uint16
+
+	if t.TradePrice/1e8 > 1 {
+		억 = uint16(t.TradePrice / 1e8)
+		만 = uint16(t.TradePrice/1e4) % 10000
+		원 = uint16(int(t.TradePrice) % 10000)
+		return fmt.Sprintf("%v: 현재가:%d억%d만%d원 전일대비:%0.f퍼", t.Code, 억, 만, 원, t.SignedChangeRate)
+	} else {
+		만 = uint16(t.TradePrice/1e4) % 10000
+		원 = uint16(int(t.TradePrice) % 10000)
+
+		return fmt.Sprintf("%v: 현재가:%d만%d원 전일대비:%0.2f%%", t.Code, 만, 원, 100*t.SignedChangeRate)
+	}
+
 }

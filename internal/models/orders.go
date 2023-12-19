@@ -1,5 +1,7 @@
 package models
 
+import "fmt"
+
 type AskOrder struct {
 	Market  string `json:"market" binding:"required" example:"KRW-BTC"` // 마켓 ID
 	OrdType string `json:"ord_type"`
@@ -12,6 +14,15 @@ type BidOrder struct {
 	OrdType string `json:"ord_type"`
 	Price   string `json:"price"`
 	Side    string `json:"side" binding:"required"` // 주문 종류
+}
+
+func (A AskOrder) String() string {
+
+	return fmt.Sprintf("%s 매도 수량 : %s", A.Market, A.Volume)
+}
+
+func (B BidOrder) String() string {
+	return fmt.Sprintf("%s 매수 : %s원", B.Market, B.Price)
 }
 
 type Order struct {
