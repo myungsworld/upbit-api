@@ -85,7 +85,7 @@ func getAvailableCoins() {
 
 		if coin.Market[0:3] == "KRW" {
 			// 아래 코인 가격이 너무 낮아 변동률이 커서 제외 및 신규 코인 제외
-			if coin.Market == "KRW-BTT" || coin.Market == "KRW-SHIB" || coin.Market == "KRW-XEC" || coin.Market == "KRW-ASTR" {
+			if ExceptMarkets(coin.Market) {
 			} else {
 				Markets = append(Markets, coin.Market)
 			}
@@ -93,4 +93,13 @@ func getAvailableCoins() {
 		}
 	}
 
+}
+
+func ExceptMarkets(Market string) bool {
+
+	if Market == "KRW-BTT" || Market == "KRW-SHIB" || Market == "KRW-XEC" {
+		return true
+	} else {
+		return false
+	}
 }

@@ -3,6 +3,7 @@ package autoTrading
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"strconv"
 	"upbit-api/config"
 	accounts2 "upbit-api/internal/api/accounts"
@@ -30,6 +31,7 @@ func AveragingDown() {
 		if fluctuationRate < -9 {
 			coin := orders.Market(ticker.Code)
 			coin.BidMarketPrice(constants.AutoTradingBidPrice)
+			log.Print(coin, fmt.Sprintf(" %0.2f%% 매수", fluctuationRate))
 		}
 
 		// 15 퍼 이상 수익률 나면 매도
@@ -37,6 +39,7 @@ func AveragingDown() {
 		if fluctuationRate > 15 {
 			coin := orders.Market(ticker.Code)
 			coin.AskMarketPrice(account.Balance)
+			log.Print(coin, fmt.Sprintf(" %0.2f%% 매도", fluctuationRate))
 		}
 
 	}

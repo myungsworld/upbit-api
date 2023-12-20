@@ -39,3 +39,10 @@ type RespOrder struct {
 	Side    string `json:"side"` // 주문 종류
 	OrdType string `json:"ord_type"`
 }
+
+type ResponseOrder400 struct {
+	Error struct {
+		Name    string `json:"name"`
+		Message string `json:"message"`
+	} `json:"error"`
+}

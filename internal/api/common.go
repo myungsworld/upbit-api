@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"strings"
 	"upbit-api/internal/middlewares"
 	"upbit-api/internal/models"
 )
@@ -60,7 +61,6 @@ func Request(endPoint string, body interface{}) interface{} {
 	} else {
 		switch order := body.(type) {
 		case models.BidOrder, models.AskOrder:
-			fmt.Println(order)
 			b, _ := json.Marshal(&order)
 			req, err = http.NewRequest(method, endPoint, bytes.NewBuffer(b))
 		}
@@ -95,8 +95,6 @@ func respHandler(endPoint string, resp *http.Response) interface{} {
 	var respCode interface{}
 
 	switch resp.StatusCode {
-	case 401:
-		log.Fatalf("err: %d , %v", resp.StatusCode, string(respBody))
 	case 200, 201:
 		switch endPoint {
 		case GetAccountEndPoint:
@@ -106,6 +104,13 @@ func respHandler(endPoint string, resp *http.Response) interface{} {
 		default:
 			fmt.Println(string(respBody))
 		}
+	case 400:
+		if strings.Contains(string(respBody), "insufficient_funds_bid") {
+			respCode = &models.ResponseOrder400{}
+		}
+
+	case 401:
+		log.Fatalf("err: %d , %v", resp.StatusCode, string(respBody))
 	default:
 		log.Fatalf("err: %d , %v", resp.StatusCode, string(respBody))
 	}

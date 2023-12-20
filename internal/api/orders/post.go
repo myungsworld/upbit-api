@@ -32,15 +32,6 @@ func (m Market) BidMarketPrice(amount string) {
 		Side:    buy,
 	})
 
-	//request(
-	//	BidOrder{
-	//		string(m),
-	//		marketPriceBuy,
-	//		amount,
-	//		buy,
-	//	},
-	//)
-
 }
 
 // 시장가 매도

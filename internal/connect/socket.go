@@ -24,22 +24,18 @@ func Socket(socketType string, code ...string) *websocket.Conn {
 
 	var subscription string
 	var markets string
-	var lenCode int
 
 	if len(code) == 0 {
 		// code 없을시 기본 config 값에서 가져옴
 		for _, market := range config.Markets {
 			markets = markets + "\"" + market + "\"" + ","
 		}
-		lenCode = len(config.Markets)
 
 	} else {
 		// code 있을시 해당 마켓만 조회
 		for _, market := range code {
 			markets = markets + "\"" + market + "\"" + ","
 		}
-
-		lenCode = len(code)
 	}
 
 	markets = markets[:len(markets)-1]
@@ -50,8 +46,6 @@ func Socket(socketType string, code ...string) *websocket.Conn {
 	if err != nil {
 		log.Fatal("Error subscribing to market data:", err)
 	}
-
-	fmt.Printf("코인 %d개 모니터링 소켓 시작\n", lenCode)
 
 	return conn
 }

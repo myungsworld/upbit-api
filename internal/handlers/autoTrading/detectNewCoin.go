@@ -4,10 +4,17 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
+	"strconv"
 	"time"
 	"upbit-api/config"
+	"upbit-api/internal/api/accounts"
+	"upbit-api/internal/api/orders"
+	"upbit-api/internal/connect"
+	"upbit-api/internal/constants"
 	"upbit-api/internal/gmail"
+	"upbit-api/internal/models"
 )
 
 type NewTradableMarket struct {
@@ -34,19 +41,55 @@ func DetectNewCoin() {
 
 			for _, newMarket := range newMarkets {
 				if _, exist := originMarketPool[newMarket]; exist {
-
 				} else {
-					// TODO : config.Markets 초기화
-					// TODO : newMarket 매수 후 대기열 진입
-					gmail.Send(fmt.Sprintf("신규코인 상장 :%s", newMarket), "")
-					time.Sleep(time.Second * 10)
+					// 새로운 코인 업비트 상장
+
+					var myAvgPrice float64
+					var balance string
+
+					// 새 코인 매수
+					coin := orders.Market(newMarket)
+					coin.BidMarketPrice(constants.NewCoinBidPrice)
+
+					// 매수한 코인 정보 가져오기
+					accts := accounts.Get()
+					for _, acct := range accts {
+						if newMarket == fmt.Sprintf("%s-%s", acct.UnitCurrency, acct.Currency) {
+							myAvgPrice, _ = strconv.ParseFloat(acct.AvgBuyPrice, 64)
+							balance = acct.Balance
+							break
+						}
+					}
+
+					// 금액이 없어 주문을 못한 경우 , 새 코인 찾기
+					if myAvgPrice == 0 && balance == "" {
+
+						// 실패 메일 전송
+						gmail.Send(fmt.Sprintf("신규 %s 코인 상장", newMarket), "금액 부족으로 인한 구매 실패")
+						// config.Markets 초기화
+						config.Markets = append(config.Markets, newMarket)
+						originMarketPool[newMarket] = 1
+						break
+					}
+
+					// 매수 성송 메일 전송
+					gmail.Send(fmt.Sprintf("신규 %s 코인 상장", newMarket),
+						fmt.Sprintf("%s\n매수금액 : %s원 \n매수평균가: %f원", newMarket, constants.NewCoinBidPrice, myAvgPrice))
+
+					// config.Markets 초기화
+					config.Markets = append(config.Markets, newMarket)
+					originMarketPool[newMarket] = 1
+
+					// 소켓 열고 30퍼 이상일시 매도 후 소켓 종료 or 1시간 지나면 소켓 종료
+					bidNewPublicMarket(newMarket, balance, myAvgPrice)
+					break
 				}
 			}
-		}
-		time.Sleep(time.Second * 1)
 
-		fmt.Print("이전:", len(config.Markets), ",")
-		fmt.Println("이후:", len(newMarkets))
+		}
+		// 기존 마켓이랑 새로운 마켓의 길이가 어떻게 다른지 확인
+		//fmt.Println(len(config.Markets), len(newMarkets))
+		time.Sleep(time.Second * 1)
 	}
 }
 
@@ -81,9 +124,54 @@ func getAvailableCoins() {
 
 		if coin.Market[0:3] == "KRW" {
 			// 아래 코인 가격이 너무 낮아 변동률이 커서 제외
-			if coin.Market == "KRW-BTT" || coin.Market == "KRW-SHIB" || coin.Market == "KRW-XEC" {
+			if config.ExceptMarkets(coin.Market) {
 			} else {
 				newMarkets = append(newMarkets, coin.Market)
+			}
+
+		}
+	}
+
+}
+
+func bidNewPublicMarket(market, balance string, myAvgPrice float64) {
+
+	conn := connect.Socket(config.Ticker, market)
+
+	log.Printf("%s 신규코인 매도 대기열로 들어옴", market)
+
+	timer := time.NewTimer(time.Second * 5)
+
+	// 대기열
+	for {
+		// 1시간이 지나면 해당 대기열 종료
+		select {
+		case <-timer.C:
+			timer.Stop()
+			log.Printf("%s 신규코인 매도 대기열 종료", market)
+			conn.Close()
+			return
+
+		default:
+			_, message, err := conn.ReadMessage()
+			if err != nil {
+				break
+			}
+
+			ticker := models.Ticker{}
+
+			if err := json.Unmarshal(message, &ticker); err != nil {
+				panic(err)
+			}
+
+			fluctuationRate := (ticker.TradePrice/myAvgPrice)*100 - 100
+
+			// 매수 평균 가격보다 30퍼 이상 올랐을시 전체 매도
+			if fluctuationRate > 30 {
+				coin := orders.Market(market)
+				coin.AskMarketPrice(balance)
+
+				conn.Close()
 			}
 
 		}

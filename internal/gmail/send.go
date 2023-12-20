@@ -44,7 +44,7 @@ func sendEmail(smtpServer, smtpPort, from, password, to, subject, body string) e
 	if err != nil {
 		return fmt.Errorf("이메일 전송 실패: %v", err)
 	}
-
-	fmt.Println("이메일이 성공적으로 전송되었습니다.")
+	log.Print(subject)
+	log.Print(body)
 	return nil
 }
