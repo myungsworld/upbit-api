@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"time"
 	"upbit-api/config"
 	accounts2 "upbit-api/internal/api/accounts"
 	"upbit-api/internal/api/orders"
@@ -15,6 +16,19 @@ import (
 
 func AveragingDown() {
 
+	averagingDownTicker := time.NewTicker(time.Second)
+
+	for {
+		select {
+		case <-averagingDownTicker.C:
+			averagingDownHandler()
+			averagingDownTicker = time.NewTicker(time.Second)
+		}
+	}
+}
+
+// 구매한 코인중 -9퍼가 넘어갈시 다시 매수 , 수익률이 7퍼가 넘을시 해당 코인 전체 매도
+func averagingDownHandler() {
 	accounts := accounts2.Get()
 
 	tickers := getCurrentTickerMappingAccounts(accounts)

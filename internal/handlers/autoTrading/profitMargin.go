@@ -22,6 +22,18 @@ type Margin struct {
 
 func MarginMonitoring() {
 
+	profitMarginTicker := time.NewTicker(time.Second)
+
+	for {
+		select {
+		case <-profitMarginTicker.C:
+			MarginMonitoringHandler()
+		}
+	}
+}
+
+func MarginMonitoringHandler() {
+
 	accounts := accounts2.Get()
 
 	marginTable := make(map[string]Margin)

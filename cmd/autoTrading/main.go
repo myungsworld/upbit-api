@@ -1,12 +1,10 @@
 package main
 
 import (
-	"fmt"
-	"log"
-	"time"
+	"os"
+	"os/signal"
+	"syscall"
 	"upbit-api/config"
-	"upbit-api/internal/api/orders"
-	"upbit-api/internal/constants"
 	"upbit-api/internal/handlers/autoTrading"
 )
 
@@ -17,42 +15,21 @@ import (
 // 폭락에 최소화하는 방법 분할매도
 func main() {
 
-	healthCheckTicker := time.NewTicker(time.Second)
-	bidEveryHourTicker := autoTrading.SetTickerForBidEveryHour()
-	averagingDownTicker := time.NewTicker(time.Second)
-	detectNewCoinTicker := time.NewTicker(2 * time.Second)
-	profitMarginTicker := time.NewTicker(time.Second)
-	for {
-		select {
-		// health check
-		case <-healthCheckTicker.C:
-			log.Print("Auto Trading going well")
-			healthCheckTicker = time.NewTicker(time.Hour)
-		// 매시간(기준 58분) 마다 전날 대비 많이 가장 많이 내린 코인 매수 ( -5퍼가 넘지 않으면 매수하지 않음 )
-		case <-bidEveryHourTicker.C:
-			fmt.Println(1)
-			market, signedRate := autoTrading.GetBiggestFallenCoin()
-			if signedRate < -5 {
-				coin := orders.Market(market)
-				coin.BidMarketPrice(constants.AutoTradingBidPrice)
-				log.Print(market, fmt.Sprintf(" %0.2f%% 하락 , 매수 %s원", signedRate, constants.AutoTradingBidPrice))
-			}
-			bidEveryHourTicker = autoTrading.SetTickerForBidEveryHour()
-		// 구매한 코인중 -9퍼가 넘어갈시 다시 매수 , 수익률이 7퍼가 넘을시 해당 코인 전체 매도
-		case <-averagingDownTicker.C:
-			fmt.Println(2)
-			autoTrading.AveragingDown()
-			averagingDownTicker = time.NewTicker(2 * time.Second)
-		// 신규 코인 상장시 탐지 및 매수 후 메일 발송 및 수익률 30퍼 넘을시 매도 및 메일 발송
-		case <-detectNewCoinTicker.C:
-			fmt.Println(3)
-			autoTrading.DetectNewCoin()
-		// 구매한 코인의 일별 최대 수익률 , 최대 손해율 기록 -> 정오에 메일 발송
-		case <-profitMarginTicker.C:
-			fmt.Println(4)
-			autoTrading.MarginMonitoring()
-		}
-	}
+	stopChan := make(chan os.Signal, 1)
+	signal.Notify(stopChan, os.Interrupt, syscall.SIGTERM)
+
+	// health check
+	go autoTrading.HealthCheck()
+	// 매시간(기준 58분) 마다 전날 대비 많이 가장 많이 내린 코인 매수 ( -5퍼가 넘지 않으면 매수하지 않음 )
+	go autoTrading.BidEveryHour()
+	// 구매한 코인중 -9퍼가 넘어갈시 다시 매수 , 수익률이 7퍼가 넘을시 해당 코인 전체 매도
+	go autoTrading.AveragingDown()
+	// 신규 코인 상장시 탐지 및 매수 후 메일 발송 및 수익률 30퍼 넘을시 매도 및 메일 발송
+	go autoTrading.DetectNewCoin()
+	// 구매한 코인의 일별 최대 수익률 , 최대 손해율 기록 -> 정오에 메일 발송
+	go autoTrading.MarginMonitoring()
+
+	<-stopChan
 
 }
 

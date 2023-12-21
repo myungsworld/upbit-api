@@ -2,14 +2,34 @@ package autoTrading
 
 import (
 	"encoding/json"
+	"fmt"
+	"log"
 	"sort"
 	"time"
 	"upbit-api/config"
+	"upbit-api/internal/api/orders"
 	"upbit-api/internal/connect"
+	"upbit-api/internal/constants"
 	"upbit-api/internal/models"
 )
 
-func GetBiggestFallenCoin() (string, float64) {
+func BidEveryHour() {
+	bidEveryHourTicker := setTickerForBidEveryHour()
+	for {
+		select {
+		case <-bidEveryHourTicker.C:
+			market, signedRate := getBiggestFallenCoin()
+			if signedRate < -5 {
+				coin := orders.Market(market)
+				coin.BidMarketPrice(constants.AutoTradingBidPrice)
+				log.Print(market, fmt.Sprintf(" %0.2f%% 하락 , 매수 %s원", signedRate, constants.AutoTradingBidPrice))
+			}
+			bidEveryHourTicker = setTickerForBidEveryHour()
+		}
+	}
+}
+
+func getBiggestFallenCoin() (string, float64) {
 	conn := connect.Socket(config.Ticker)
 
 	tickers := make(map[string]models.Ticker, 0)
@@ -50,7 +70,7 @@ func GetBiggestFallenCoin() (string, float64) {
 	return arrTickers[0].Code, arrTickers[0].SignedChangeRate * 100
 }
 
-func SetTickerForBidEveryHour() *time.Ticker {
+func setTickerForBidEveryHour() *time.Ticker {
 
 	now := time.Now()
 
