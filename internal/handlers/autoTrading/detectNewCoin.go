@@ -88,7 +88,7 @@ func DetectNewCoin() {
 
 		}
 		// 기존 마켓이랑 새로운 마켓의 길이가 어떻게 다른지 확인
-		//fmt.Println(len(config.Markets), len(newMarkets))
+		fmt.Println(len(config.Markets), len(newMarkets))
 		time.Sleep(time.Second * 1)
 	}
 }

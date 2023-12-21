@@ -34,5 +34,6 @@ func GetAvailableKRW() int {
 
 func Get() models.Accounts {
 	accounts := index()
+
 	return *accounts
 }

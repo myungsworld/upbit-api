@@ -2,7 +2,6 @@ package autoTrading
 
 import (
 	"encoding/json"
-	"log"
 	"sort"
 	"time"
 	"upbit-api/config"
@@ -62,8 +61,6 @@ func SetTickerForBidEveryHour() *time.Ticker {
 	}
 
 	duration := startTime.Sub(now)
-
-	log.Print(duration)
 
 	ticker := time.NewTicker(duration)
 

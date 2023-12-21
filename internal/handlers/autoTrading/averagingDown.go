@@ -20,6 +20,7 @@ func AveragingDown() {
 	tickers := getCurrentTickerMappingAccounts(accounts)
 
 	for _, account := range accounts {
+
 		ticker := tickers[fmt.Sprintf("%s-%s", account.UnitCurrency, account.Currency)]
 
 		myAvgPrice, _ := strconv.ParseFloat(account.AvgBuyPrice, 64)

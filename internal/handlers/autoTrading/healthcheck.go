@@ -1,0 +1,5 @@
+package autoTrading
+
+func HealthCheck() {
+
+}
