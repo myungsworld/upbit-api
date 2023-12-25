@@ -3,7 +3,9 @@ package autoTrading
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"strconv"
+	"strings"
 	"time"
 	"upbit-api/config"
 	accounts2 "upbit-api/internal/api/accounts"
@@ -67,6 +69,10 @@ func MarginMonitoringHandler() {
 		default:
 			_, message, err := conn.ReadMessage()
 			if err != nil {
+				if strings.Contains(err.Error(), "connection reset by peer") {
+					log.Print("Profit Margin err :", err.Error())
+					continue
+				}
 				break
 			}
 

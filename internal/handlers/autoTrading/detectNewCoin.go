@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 	"upbit-api/config"
 	"upbit-api/internal/api/accounts"
@@ -47,6 +48,11 @@ func detectNewCoinHandler() {
 	for {
 		newMarkets = make([]string, 0)
 		getAvailableCoins()
+
+		if len(newMarkets) == 0 {
+			//log.Print("detect New coin 에러 발생")
+			continue
+		}
 		// 원래는 < 이렇게 해야 새로운 마켓이 더많아서 새로운 코인이 추가되었다고 보는데
 		// 그 외의 다른경우도 있을까 싶어서
 		if len(config.Markets) != len(newMarkets) {
@@ -117,12 +123,20 @@ func getAvailableCoins() {
 
 	resp, err := client.Do(req)
 	if err != nil {
+		if strings.Contains(err.Error(), "connection reset by peer") {
+			//gmail.Send("detectNewCoin 에러", err.Error())
+			return
+		}
 		panic(err)
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
+		if strings.Contains(err.Error(), "connection reset by peer") {
+			//gmail.Send("detectNewCoin 에러", err.Error())
+			return
+		}
 		panic(err)
 	}
 

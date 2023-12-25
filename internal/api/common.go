@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"upbit-api/internal/gmail"
 	"upbit-api/internal/middlewares"
 	"upbit-api/internal/models"
 )
@@ -79,6 +80,10 @@ func Request(endPoint string, body interface{}) interface{} {
 	}
 	defer resp.Body.Close()
 
+	// 요청횟수 제한 확인
+	//remainingReqHeader := resp.Header.Get("Remaining-Req")
+	//fmt.Println("Remaining-Req Header:", remainingReqHeader)
+
 	result := respHandler(endPoint, resp)
 
 	return result
@@ -89,6 +94,10 @@ func respHandler(endPoint string, resp *http.Response) interface{} {
 
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
+		if strings.Contains(err.Error(), "connection reset by peer") {
+			gmail.Send("업비트 에러", err.Error())
+			return nil
+		}
 		panic(err)
 	}
 
@@ -110,8 +119,10 @@ func respHandler(endPoint string, resp *http.Response) interface{} {
 		}
 
 	case 401:
+		gmail.Send("업비트 에러", fmt.Sprintf("err: %d , %v", resp.StatusCode, string(respBody)))
 		log.Fatalf("err: %d , %v", resp.StatusCode, string(respBody))
 	default:
+		gmail.Send("업비트 에러", fmt.Sprintf("err: %d , %v", resp.StatusCode, string(respBody)))
 		log.Fatalf("err: %d , %v", resp.StatusCode, string(respBody))
 	}
 

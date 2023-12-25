@@ -2,16 +2,13 @@ package main
 
 import (
 	"upbit-api/config"
-	"upbit-api/internal/api/candle"
+	"upbit-api/internal/api/orders"
 )
 
 func main() {
 
-	//acc := accounts.Get()
-	//fmt.Println(acc)
-
-	coin := candle.Market("KRW-BTC")
-	coin.Min()
+	coin := orders.Market("KRW-SEI")
+	coin.BidMarketPrice("6000")
 }
 
 // .env 로드 , Market 상태 수집

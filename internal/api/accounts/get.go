@@ -12,6 +12,9 @@ import (
 func index() *models.Accounts {
 
 	result := api.Request("https://api.upbit.com/v1/accounts", nil)
+	if result == nil {
+		return nil
+	}
 	accounts := result.(*models.Accounts)
 
 	return accounts
@@ -34,6 +37,10 @@ func GetAvailableKRW() int {
 
 func Get() models.Accounts {
 	accounts := index()
+
+	if accounts == nil {
+		return nil
+	}
 
 	return *accounts
 }

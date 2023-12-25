@@ -16,13 +16,13 @@ import (
 
 func AveragingDown() {
 
-	averagingDownTicker := time.NewTicker(time.Second)
+	averagingDownTicker := time.NewTicker(time.Second * 5)
 
 	for {
 		select {
 		case <-averagingDownTicker.C:
 			averagingDownHandler()
-			averagingDownTicker = time.NewTicker(time.Second)
+			averagingDownTicker = time.NewTicker(time.Minute * 30)
 		}
 	}
 }
