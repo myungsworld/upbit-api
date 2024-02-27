@@ -1,35 +1,25 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
 	"upbit-api/config"
-	"upbit-api/internal/connect"
-	"upbit-api/internal/models"
 )
 
+// 비트 시세 알람 프로그램
 func main() {
 
-	conn := connect.Socket(config.Ticker, "KRW-BTC")
+	stopChan := make(chan os.Signal, 1)
+	signal.Notify(stopChan, os.Interrupt, syscall.SIGTERM)
 
-	go func() {
-		for {
-			_, message, err := conn.ReadMessage()
-			if err != nil {
-				fmt.Println(err)
-				panic(err)
-			}
+	//conn := connect.Socket(config.Ticker)
 
-			ticker := models.Ticker{}
+	// 비트코인이 1퍼 내리면 알람
 
-			if err = json.Unmarshal(message, &ticker); err != nil {
-				panic(err)
-			}
+	// 내가 가진 코인중 양전환 됐을떄 알람
 
-		}
-	}()
-
-	select {}
+	<-stopChan
 }
 
 func init() {

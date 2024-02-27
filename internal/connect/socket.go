@@ -19,7 +19,9 @@ func Socket(socketType string, code ...string) *websocket.Conn {
 
 	conn, _, err := websocket.DefaultDialer.Dial(config.UpbitWebSocketURL, nil)
 	if err != nil {
-		log.Fatal("Error connecting to WebSocket:", err)
+		log.Println("Error connecting to WebSocket:", err)
+		return nil
+		//log.Fatal("Error connecting to WebSocket:", err)
 	}
 
 	var subscription string

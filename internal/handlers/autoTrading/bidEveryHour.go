@@ -39,6 +39,7 @@ func getBiggestFallenCoin() (string, float64) {
 		_, message, err := conn.ReadMessage()
 
 		if err != nil {
+			log.Println("여기인가1", err)
 			break
 		}
 
