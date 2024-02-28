@@ -13,6 +13,6 @@ func (m Market) Min() {
 
 }
 
-func (m Market) Day() {
-	api.Request(fmt.Sprintf("https://api.upbit.com/v1/candles/days?market=%v&count=2", string(m)), nil)
+func (m Market) Day(count int) {
+	api.Request(fmt.Sprintf("https://api.upbit.com/v1/candles/days?market=%v&count=%d", string(m), count), nil)
 }
