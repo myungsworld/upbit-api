@@ -14,8 +14,9 @@ import (
 )
 
 const (
-	GetAccountEndPoint = "https://api.upbit.com/v1/accounts"
-	OrderEndPoint      = "https://api.upbit.com/v1/orders"
+	GetAccountEndPoint   = "https://api.upbit.com/v1/accounts"
+	OrderEndPoint        = "https://api.upbit.com/v1/orders"
+	GetCandleDayEndPoint = "https://api.upbit.com/v1/candles/days"
 )
 
 func Request(endPoint string, body interface{}) interface{} {
@@ -95,15 +96,29 @@ func respHandler(endPoint string, resp *http.Response) interface{} {
 	var respCode interface{}
 
 	switch resp.StatusCode {
+
+	//case 200, 201:
+	//	switch endPoint {
+	//	case GetAccountEndPoint:
+	//		respCode = &models.Accounts{}
+	//	case OrderEndPoint:
+	//		respCode = &models.RespOrder{}
+	//	default:
+	//		fmt.Println(string(respBody))
+	//	}
+
 	case 200, 201:
-		switch endPoint {
-		case GetAccountEndPoint:
+		switch {
+		case endPoint == GetAccountEndPoint:
 			respCode = &models.Accounts{}
-		case OrderEndPoint:
+		case endPoint == OrderEndPoint:
 			respCode = &models.RespOrder{}
+		case strings.Contains(endPoint, GetCandleDayEndPoint):
+			respCode = &models.ResponseDay{}
 		default:
 			fmt.Println(string(respBody))
 		}
+
 	case 400:
 		if strings.Contains(string(respBody), "insufficient_funds_bid") {
 			respCode = &models.ResponseOrder400{}

@@ -97,7 +97,7 @@ func getAvailableCoins() {
 
 func ExceptMarkets(Market string) bool {
 
-	if Market == "KRW-BTT" || Market == "KRW-SHIB" || Market == "KRW-XEC" {
+	if Market == "KRW-BTC" || Market == "KRW-BTT" || Market == "KRW-SHIB" || Market == "KRW-XEC" {
 		return true
 	} else {
 		return false
