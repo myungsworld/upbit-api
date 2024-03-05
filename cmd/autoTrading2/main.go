@@ -168,7 +168,7 @@ func reset() {
 					//}
 
 					//API 갯수 제한
-					time.Sleep(50 * time.Millisecond)
+					time.Sleep(100 * time.Millisecond)
 
 					can := candle.Market(market)
 
