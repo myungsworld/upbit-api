@@ -130,6 +130,7 @@ func respHandler(endPoint string, resp *http.Response) interface{} {
 		fmt.Println(string(respBody))
 		respCode = &models.Response429Error{}
 	case 503:
+		fmt.Println(string(respBody))
 		respCode = &models.Response503Error{}
 
 	default:
