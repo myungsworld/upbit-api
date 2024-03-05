@@ -26,6 +26,8 @@ type info struct {
 	HighTradeGap    float64 // 고가 - 종가 차이
 
 	OpeningPrice float64 // 금일 시작가
+
+	TradePrice float64 // 현재가
 }
 
 func (i info) String() string {
@@ -37,7 +39,8 @@ func (i info) String() string {
 금일 시작가 : %f
 저점대비 종가: %0.2f%%
 종가대비 시가: %0.2f%%
-고점대비 종가: %0.2f%%`, i.LowAverage, i.TradeAverage, i.HighAverage, i.OpeningPrice, i.LowTradeGap, i.TradeOpeningGap, i.HighTradeGap)
+고점대비 종가: %0.2f%%
+현재가: %f`, i.LowAverage, i.TradeAverage, i.HighAverage, i.OpeningPrice, i.LowTradeGap, i.TradeOpeningGap, i.HighTradeGap, i.TradePrice)
 
 	return result
 
@@ -56,7 +59,8 @@ func main() {
 	stopChan := make(chan os.Signal, 1)
 	signal.Notify(stopChan, os.Interrupt, syscall.SIGTERM)
 
-	// 1일마다 리셋 ( 한국시각 9시 )
+	// 1일마다 리셋 ( 한국시각 9시 1초 )
+	// 3일 저점,종가,고가 평균 연산 후 상태값 저장
 	go reset()
 
 	socketOpenTicker := time.NewTicker(time.Second * 2)
@@ -69,6 +73,7 @@ func main() {
 
 				conn := connect.Socket(config.Ticker)
 				for {
+
 					_, message, err := conn.ReadMessage()
 					if err != nil {
 						break
@@ -82,56 +87,47 @@ func main() {
 					previousMarketMutex.Lock()
 					if data, ok := previousMarketInfo[ticker.Code]; ok {
 
-						fmt.Println(ticker.Code)
-						fmt.Println(data)
-
-						fmt.Println(ticker.Code, "삭제")
-						delete(previousMarketInfo, ticker.Code)
-
-						// opening Price 가 저점의 평균보다 낮으면 매수 안함 ( 오늘 갑자기 존나 내려간 경우 혹은 어제 많이 내려서 마감한 경우)
-
+						// opening Price(시작가) 가 저점의 평균보다 낮으면 매수 안함 ( 오늘 갑자기 존나 내려간 경우 혹은 어제 많이 내려서 마감한 경우)
 						// opening Price 가 고점의 평균보다 높으면 매수 안함 ( 오늘 갑자기 존나 올라온 경우 혹은 어제 많이 올라서 마감한 경우)
+						if data.LowAverage > data.OpeningPrice || data.HighAverage < data.OpeningPrice {
+							delete(previousMarketInfo, ticker.Code)
+							previousMarketMutex.Unlock()
+							continue
+						}
 
-						// 하루전에 급격히 오른경우 다시 봐야함
+						// 금일 시작가와 종가의 평균 편차가 0.5% 내외면 모니터링 진입 (고루틴)
+						if math.Abs(data.TradeOpeningGap) < 0.5 {
 
-						// 저점의 평균으로 왔을때 매수
+							// 종가 평균과 고가 평균의 차이가 3퍼 내외인 경우는 제외
+							if (data.HighTradeGap - data.LowTradeGap) < 3 {
+								delete(previousMarketInfo, ticker.Code)
+								previousMarketMutex.Unlock()
+								continue
+							}
 
-						// 고점과 저점의 퍼센트 차이 구하고 그 반 퍼센트의 수익이 난다면 매도
+							fmt.Println(ticker.Code)
+							fmt.Println(data)
+
+							// 저점의 평균에서 매수
+							// 고점의 종가 -1%에서 매도
+							//go autoTrading2.Handler()
+
+						}
+
+						delete(previousMarketInfo, ticker.Code)
 
 					}
 					previousMarketMutex.Unlock()
 
 				}
 
-				fmt.Println("여기는 for 문 밖")
+				// for 문 밖
 
 			}
 		}
+
+		// goroutine 밖
 	}()
-
-	//go func() {
-	//	for {
-	//		select {
-	//		case val, ok := <-golChan:
-	//			if !ok {
-	//				fmt.Println(val, ok)
-	//			} else {
-	//				fmt.Println(val, ok)
-	//				time.Sleep(time.Hour)
-	//			}
-	//		}
-	//	}
-	//}()
-
-	// opening Price 가 저점의 평균보다 낮으면 매수 안함 ( 오늘 갑자기 존나 내려간 경우 혹은 어제 많이 내려서 마감한 경우)
-
-	// opening Price 가 고점의 평균보다 높으면 매수 안함 ( 오늘 갑자기 존나 올라온 경우 혹은 어제 많이 올라서 마감한 경우)
-
-	// 하루전에 급격히 오른경우 다시 봐야함
-
-	// 저점의 평균으로 왔을때 매수
-
-	// 고점과 저점의 퍼센트 차이 구하고 그 반 퍼센트의 수익이 난다면 매도
 
 	<-stopChan
 
@@ -151,6 +147,7 @@ func reset() {
 	//
 	for {
 		select {
+
 		case <-setTicker.C:
 
 			log.Println("데이터 초기화 시작")
@@ -166,24 +163,30 @@ func reset() {
 
 				for _, market := range config.Markets {
 
-					//if market != "KRW-SOL" && market != "KRW-GRT" {
+					//if market != "KRW-MANA" && market != "KRW-CRO" {
 					//	continue
 					//}
 
 					//API 갯수 제한
-					time.Sleep(100 * time.Millisecond)
+					time.Sleep(50 * time.Millisecond)
 
 					can := candle.Market(market)
 
 					responseDay := can.Day(count)
 
+					if responseDay == nil {
+						continue
+					}
+
 					lowAverage := 0.0
 					highAverage := 0.0
 					tradeAverage := 0.0
 					openingPrice := 0.0
+					tradePrice := 0.0
 					for i, day := range *responseDay {
 						if i == 0 {
 							openingPrice += day.OpeningPrice
+							tradePrice += day.TradePrice
 						}
 
 						if i != 0 {
@@ -196,7 +199,7 @@ func reset() {
 					tradeAverage = tradeAverage / (count - 1)
 					highAverage = highAverage / (count - 1)
 					lowTradeGap := math.Trunc((lowAverage/tradeAverage-1)*10000) / 100
-					tradeOpeningGap := math.Trunc((tradeAverage/openingPrice-1)*10000) / 100
+					tradeOpeningGap := math.Trunc((openingPrice/tradeAverage-1)*10000) / 100
 					highTradeGap := math.Trunc((highAverage/tradeAverage-1)*10000) / 100
 
 					previousMarketMutex.Lock()
@@ -208,6 +211,7 @@ func reset() {
 						tradeOpeningGap,
 						highTradeGap,
 						openingPrice,
+						tradePrice,
 					}
 					previousMarketMutex.Unlock()
 				}
