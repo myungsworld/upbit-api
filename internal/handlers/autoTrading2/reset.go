@@ -108,7 +108,7 @@ func cal(responseDay *models.ResponseDay, market string) {
 	tradeAverage = tradeAverage / (count - 1)
 	highAverage = highAverage / (count - 1)
 	lowTradeGap := math.Trunc((lowAverage/tradeAverage-1)*10000) / 100
-	tradeOpeningGap := math.Trunc((openingPrice/tradeAverage-1)*10000) / 100
+	closeTradingGap := math.Trunc((tradePrice/tradeAverage-1)*10000) / 100
 	highTradeGap := math.Trunc((highAverage/tradeAverage-1)*10000) / 100
 
 	PreviousMarketMutex.Lock()
@@ -117,7 +117,7 @@ func cal(responseDay *models.ResponseDay, market string) {
 		TradeAverage:    tradeAverage,
 		HighAverage:     highAverage,
 		LowTradeGap:     lowTradeGap,
-		TradeOpeningGap: tradeOpeningGap,
+		CloseTradingGap: closeTradingGap,
 		HighTradeGap:    highTradeGap,
 		OpeningPrice:    openingPrice,
 		TradePrice:      tradePrice,

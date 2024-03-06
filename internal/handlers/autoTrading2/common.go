@@ -18,7 +18,7 @@ type Info struct {
 	HighAverage  float64 // 고가 평균
 
 	LowTradeGap     float64 // 저가 - 종가 차이
-	TradeOpeningGap float64 // 종가 대비 시작가
+	CloseTradingGap float64 // 종가평균 대비 현재가
 	HighTradeGap    float64 // 고가 - 종가 차이
 
 	OpeningPrice float64 // 금일 시작가
@@ -33,10 +33,10 @@ func (i Info) String() string {
 종가 평균: %0.3f
 고가 평균: %0.3f
 금일 시작가 : %f
-저점대비 종가: %0.2f%%
-종가대비 시가: %0.2f%%
-고점대비 종가: %0.2f%%
-현재가: %f`, i.LowAverage, i.TradeAverage, i.HighAverage, i.OpeningPrice, i.LowTradeGap, i.TradeOpeningGap, i.HighTradeGap, i.TradePrice)
+종가평균 대비 저점 : %0.2f%%
+종가평균 대비 현가 : %0.2f%%
+종가평균 대비 고점 : %0.2f%%
+현재가: %f`, i.LowAverage, i.TradeAverage, i.HighAverage, i.OpeningPrice, i.LowTradeGap, i.CloseTradingGap, i.HighTradeGap, i.TradePrice)
 
 	return result
 
