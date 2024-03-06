@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"math"
 	"os"
 	"os/signal"
@@ -49,8 +50,8 @@ func main() {
 					autoTrading2.PreviousMarketMutex.Lock()
 					if data, ok := autoTrading2.PreviousMarketInfo[ticker.Code]; ok {
 
-						// opening Price(시작가) 가 저점의 평균보다 낮으면 매수 안함 ( 오늘 갑자기 존나 내려간 경우 혹은 어제 많이 내려서 마감한 경우)
-						// opening Price 가 고점의 평균보다 높으면 매수 안함 ( 오늘 갑자기 존나 올라온 경우 혹은 어제 많이 올라서 마감한 경우)
+						// opening Price(시작가) 가 저점의 평균보다 낮으면 매수 안함 ( 오늘 갑자기 많이 내려간 경우 혹은 어제 많이 내려서 마감한 경우)
+						// opening Price 가 고점의 평균보다 높으면 매수 안함 ( 오늘 갑자기 많이 올라온 경우 혹은 어제 많이 올라서 마감한 경우)
 						if data.LowAverage > data.OpeningPrice || data.HighAverage < data.OpeningPrice {
 							delete(autoTrading2.PreviousMarketInfo, ticker.Code)
 							autoTrading2.PreviousMarketMutex.Unlock()
@@ -67,8 +68,8 @@ func main() {
 								continue
 							}
 
-							//fmt.Println(ticker.Code)
-							//fmt.Println(data)
+							fmt.Println(ticker.Code)
+							fmt.Println(data)
 
 							// 저점의 평균에서 매수
 							// 고점의 종가 -1%에서 매도

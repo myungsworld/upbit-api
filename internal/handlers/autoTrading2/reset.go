@@ -1,7 +1,6 @@
 package autoTrading2
 
 import (
-	"fmt"
 	"log"
 	"math"
 	"time"
@@ -47,8 +46,6 @@ func Reset() {
 			// 상태값 담을 map
 			PreviousMarketInfo = make(map[string]Info)
 
-			st := time.Now()
-
 			// 지난 n일의 저점과 고점의 평균을 구함 ( 하루동안 상태값으로 남겨놓음 )
 
 			for _, market := range config.Markets {
@@ -72,9 +69,6 @@ func Reset() {
 
 				cal(responseDay, market)
 			}
-			et := time.Now()
-
-			fmt.Println("실행시간 :", et.Sub(st))
 
 			//// 매일 9시 티커 설정
 			//now := time.Now()
