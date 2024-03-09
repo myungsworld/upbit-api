@@ -58,7 +58,7 @@ func main() {
 							continue
 						}
 
-						// 금일 시작가와 종가의 평균 편차가 0.5% 내외면 모니터링 진입 (고루틴)
+						// 금일 시작가와 종가의 평균 편차가 0.5% 내외면 모니터링 진입
 						if math.Abs(info.CloseTradingGap) < 0.5 {
 
 							// 종가 평균과 고가 평균의 차이가 3퍼 내외인 경우는 제외
@@ -70,13 +70,23 @@ func main() {
 
 							// 저점의 평균에서 매수
 							// 호가 계산
-							bidPrice := autoTrading2.SetBidPrice(info)
+
 							fmt.Println(ticker.Code)
 							fmt.Println(info)
-							fmt.Println(bidPrice)
+
+							//if ticker.Code == "KRW-STORJ" {
+							//	fmt.Println(info)
+							//	fmt.Println("진입")
+							//	bidPrice, bidVolume := autoTrading2.SetBidPriceAndVolume(info)
+							//	coin := orders.Market(ticker.Code)
+							//	coin.BidMarketLimit(bidPrice, bidVolume)
+							//	fmt.Println(bidPrice, bidVolume)
+							//}
 
 							// 고점의 종가 -1%에서 매도
 							//go autoTrading2.Handler()
+
+							// 손절도 정해야함
 
 						}
 

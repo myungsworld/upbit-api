@@ -2,10 +2,16 @@ package autoTrading2
 
 import (
 	"fmt"
+	"strconv"
 	"sync"
 )
 
-const count = 4
+const (
+	// 몇일 기준 ( 4일전까지의 데이터 = 3일의 데이터를 가져와서 금일과 비교 )
+	count = 4
+	// 주문 금액
+	amount = 50000
+)
 
 var (
 	PreviousMarketInfo  map[string]Info
@@ -43,7 +49,7 @@ func (i Info) String() string {
 }
 
 // 지정가 매수 매도 호가 측정
-func SetBidPrice(info Info) string {
+func SetBidPriceAndVolume(info Info) (string, string) {
 
 	tradePrice := info.TradePrice
 	bidFloat := info.LowAverage
@@ -111,5 +117,12 @@ func SetBidPrice(info Info) string {
 			bidPrice = fmt.Sprintf("%d", int(bidFloat)/1000*1000)
 		}
 	}
-	return bidPrice
+
+	f, err := strconv.ParseFloat(bidPrice, 64)
+	if err != nil {
+		panic(err)
+	}
+	volume := fmt.Sprintf("%0.8f", amount/f)
+
+	return bidPrice, volume
 }

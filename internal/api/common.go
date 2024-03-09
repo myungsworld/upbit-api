@@ -43,6 +43,12 @@ func Request(endPoint string, body interface{}) interface{} {
 			requestBody.Set("market", order.Market)
 			requestBody.Set("side", order.Side)
 			requestBody.Set("ord_type", order.OrdType)
+		case models.LimitOrder:
+			requestBody.Set("volume", order.Volume)
+			requestBody.Set("price", order.Price)
+			requestBody.Set("market", order.Market)
+			requestBody.Set("side", order.Side)
+			requestBody.Set("ord_type", order.OrdType)
 		}
 
 		query := requestBody.Encode()
@@ -61,8 +67,9 @@ func Request(endPoint string, body interface{}) interface{} {
 		req, err = http.NewRequest(method, endPoint, nil)
 	} else {
 		switch order := body.(type) {
-		case models.BidOrder, models.AskOrder:
+		case models.BidOrder, models.AskOrder, models.LimitOrder:
 			b, _ := json.Marshal(&order)
+			fmt.Println(string(b))
 			req, err = http.NewRequest(method, endPoint, bytes.NewBuffer(b))
 		}
 	}
@@ -112,6 +119,7 @@ func respHandler(endPoint string, resp *http.Response) interface{} {
 		case endPoint == GetAccountEndPoint:
 			respCode = &models.Accounts{}
 		case endPoint == OrderEndPoint:
+			fmt.Println(string(respBody))
 			respCode = &models.RespOrder{}
 		case strings.Contains(endPoint, GetCandleDayEndPoint):
 			respCode = &models.ResponseDay{}
@@ -120,9 +128,8 @@ func respHandler(endPoint string, resp *http.Response) interface{} {
 		}
 
 	case 400:
-		if strings.Contains(string(respBody), "insufficient_funds_bid") {
-			respCode = &models.ResponseOrder400{}
-		}
+		fmt.Println(string(respBody))
+		return nil
 
 	case 401:
 		log.Fatalf("err: %d , %v", resp.StatusCode, string(respBody))

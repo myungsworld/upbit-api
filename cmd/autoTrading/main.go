@@ -28,13 +28,10 @@ func main() {
 	go autoTrading.AskCoin()
 	// 구매한 코인중 -5퍼 손해일시 해당 코인 금액에 따라 부분 매도
 
-	// 구매한 코인중 수익률이 10퍼가 넘을시 메일 전송
+	// 내가 가진 코인중 금일 많이 오른 코인 부분 매도
 
-	// 금일 많이 오른 코인 매도
 	// 신규 코인 상장시 탐지 및 매수 후 메일 발송 및 수익률 30퍼 넘을시 매도 및 메일 발송
 	//go autoTrading.DetectNewCoin()
-	// 구매한 코인의 일별 최대 수익률 , 최대 손해율 기록 -> 정오에 메일 발송
-	//go autoTrading.MarginMonitoring()
 
 	<-stopChan
 

@@ -47,20 +47,23 @@ func (m Market) AskMarketPrice(volume string) {
 }
 
 // BidMarketLimit 지정가 매수 주문
-func (m Market) BidMarketLimit(amount string) {
+func (m Market) BidMarketLimit(bidPrice, bidVolume string) *string {
 
-	var price string
-	var volume string
-
-	// 현금 = 주문가격 * 주문량
-	// amount = price * volume
-
-	api.Request("https://api.upbit.com/v1/orders", models.LimitOrder{
+	if resp := api.Request("https://api.upbit.com/v1/orders", models.LimitOrder{
 		Market:  string(m),
-		OrdType: marketPriceBuy,
-		Price:   price,
+		OrdType: marketLimitBuy,
+		Price:   bidPrice,
 		Side:    buy,
-		Volume:  volume,
-	})
+		Volume:  bidVolume,
+	}); resp != nil {
+
+		switch resp.(type) {
+		case *models.RespOrder:
+			return (*string)(&m)
+		}
+
+	}
+
+	return nil
 
 }
