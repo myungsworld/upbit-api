@@ -7,12 +7,10 @@ import (
 
 func DeleteWaitMarket() {
 
-	// 매일 8시 55분 초기화
-	//now := time.Now()
-	//resetTime := now.Truncate(24 * time.Hour).Add(time.Hour * 24).Add(-5 * time.Minute)
-	//deleteTicker := time.NewTicker(resetTime.Sub(now))
-
-	deleteTicker := time.NewTicker(time.Second * 60)
+	//매일 8시 55분 초기화
+	now := time.Now()
+	resetTime := now.Truncate(24 * time.Hour).Add(time.Hour * 24).Add(-5 * time.Minute)
+	deleteTicker := time.NewTicker(resetTime.Sub(now))
 
 	for {
 		select {
@@ -34,9 +32,9 @@ func DeleteWaitMarket() {
 				}
 			}
 
-			//now := time.Now()
-			//resetTime := now.Truncate(24 * time.Hour).Add(time.Hour * 24).Add(-5 * time.Minute)
-			//deleteTicker := time.NewTicker(resetTime.Sub(now))
+			now = time.Now()
+			resetTime = now.Truncate(24 * time.Hour).Add(time.Hour * 24).Add(-5 * time.Minute)
+			deleteTicker = time.NewTicker(resetTime.Sub(now))
 
 		}
 	}
