@@ -14,6 +14,7 @@ const (
 )
 
 var (
+	// PreviousMarketInfo 3일 저점,종가,고가 평균 연산 후 상태값 저장
 	PreviousMarketInfo  map[string]Info
 	PreviousMarketMutex sync.RWMutex
 )

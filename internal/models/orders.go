@@ -1,6 +1,9 @@
 package models
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 type AskOrder struct {
 	Market  string `json:"market" binding:"required" example:"KRW-BTC"` // 마켓 ID
@@ -56,10 +59,27 @@ type Order struct {
 	Identifier string `json:"identifier"`
 }
 
+type OrderList struct {
+	Market      string   `json:"market"`
+	Uuids       []string `json:"uuids"`
+	Identifiers []string `json:"identifiers"`
+	State       string   `json:"state"`
+	States      []string `json:"states"`
+}
+
 type RespOrder struct {
-	Uuid    string `json:"uuid"` // 주문 고유 아이디
-	Side    string `json:"side"` // 주문 종류
-	OrdType string `json:"ord_type"`
+	Uuid      string    `json:"uuid"` // 주문 고유 아이디
+	Side      string    `json:"side"` // 주문 종류
+	OrdType   string    `json:"ord_type"`
+	Price     string    `json:"price"` // 주문 당시 화페 가격
+	State     string    `json:"state"`
+	Market    string    `json:"market"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+type CancelOrder struct {
+	//Identifier string `json:"identifier"`
+	Uuid string `json:"uuid"`
 }
 
 type ResponseOrder400 struct {

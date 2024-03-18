@@ -16,6 +16,7 @@ import (
 const (
 	GetAccountEndPoint   = "https://api.upbit.com/v1/accounts"
 	OrderEndPoint        = "https://api.upbit.com/v1/orders"
+	OrderDeleteEndPoint  = "https://api.upbit.com/v1/order"
 	GetCandleDayEndPoint = "https://api.upbit.com/v1/candles/days"
 )
 
@@ -30,7 +31,7 @@ func Request(endPoint string, body interface{}) interface{} {
 	case GetAccountEndPoint:
 		method = http.MethodGet
 		token = middlewares.CreateTokenWithNoParams()
-	case OrderEndPoint:
+	case OrderEndPoint, OrderDeleteEndPoint:
 		method = http.MethodPost
 		switch order := body.(type) {
 		case models.BidOrder:
@@ -49,6 +50,13 @@ func Request(endPoint string, body interface{}) interface{} {
 			requestBody.Set("market", order.Market)
 			requestBody.Set("side", order.Side)
 			requestBody.Set("ord_type", order.OrdType)
+		case models.OrderList:
+			method = http.MethodGet
+			requestBody.Set("state", order.State)
+		case models.CancelOrder:
+			method = http.MethodDelete
+			//requestBody.Set("identifier",order.Identifier)
+			requestBody.Set("uuid", order.Uuid)
 		}
 
 		query := requestBody.Encode()
@@ -67,9 +75,8 @@ func Request(endPoint string, body interface{}) interface{} {
 		req, err = http.NewRequest(method, endPoint, nil)
 	} else {
 		switch order := body.(type) {
-		case models.BidOrder, models.AskOrder, models.LimitOrder:
+		case models.BidOrder, models.AskOrder, models.LimitOrder, models.OrderList, models.CancelOrder:
 			b, _ := json.Marshal(&order)
-			fmt.Println(string(b))
 			req, err = http.NewRequest(method, endPoint, bytes.NewBuffer(b))
 		}
 	}
@@ -104,23 +111,21 @@ func respHandler(endPoint string, resp *http.Response) interface{} {
 
 	switch resp.StatusCode {
 
-	//case 200, 201:
-	//	switch endPoint {
-	//	case GetAccountEndPoint:
-	//		respCode = &models.Accounts{}
-	//	case OrderEndPoint:
-	//		respCode = &models.RespOrder{}
-	//	default:
-	//		fmt.Println(string(respBody))
-	//	}
-
 	case 200, 201:
 		switch {
 		case endPoint == GetAccountEndPoint:
 			respCode = &models.Accounts{}
 		case endPoint == OrderEndPoint:
-			fmt.Println(string(respBody))
+			switch resp.Request.Method {
+			case "POST":
+				respCode = &models.RespOrder{}
+			case "GET":
+				respCode = &[]models.RespOrder{}
+
+			}
+		case endPoint == OrderDeleteEndPoint:
 			respCode = &models.RespOrder{}
+
 		case strings.Contains(endPoint, GetCandleDayEndPoint):
 			respCode = &models.ResponseDay{}
 		default:
@@ -133,6 +138,15 @@ func respHandler(endPoint string, resp *http.Response) interface{} {
 
 	case 401:
 		log.Fatalf("err: %d , %v", resp.StatusCode, string(respBody))
+
+	case 404:
+		switch {
+		// 주문 대기 취소 실패
+		case strings.Contains(string(respBody), "order_not_found"):
+			respCode = &models.Response404Error{}
+		default:
+			log.Fatalf("err: %d , %v", resp.StatusCode, string(respBody))
+		}
 	case 429:
 		respCode = &models.Response429Error{}
 	case 503:

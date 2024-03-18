@@ -59,7 +59,8 @@ func (m Market) BidMarketLimit(bidPrice, bidVolume string) *string {
 
 		switch resp.(type) {
 		case *models.RespOrder:
-			return (*string)(&m)
+			uuid := resp.(*models.RespOrder).Uuid
+			return &uuid
 		}
 
 	}

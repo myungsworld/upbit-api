@@ -9,14 +9,16 @@ import (
 	"syscall"
 	"time"
 	"upbit-api/config"
+	"upbit-api/internal/api/orders"
 	"upbit-api/internal/connect"
 	"upbit-api/internal/handlers/autoTrading2"
 	"upbit-api/internal/models"
 )
 
-// 이전 데이터 가져오는 기준일
-const count = 4
-
+// 코인 스윙 자동매매
+// 지나간 n일의 저점,종가,고가의 평균을 가져와 종가의 평균과 현재가의 편차가 적을때
+// 저점의 평균에서 매수대기 이후 매수가 되면 고점의 평균 -1퍼에서 매도
+// 하루동안 모니터링후 매수대기만 걸린 데이터들 주문리스트에서 삭제후 초기화 및 회귀
 func main() {
 
 	stopChan := make(chan os.Signal, 1)
@@ -26,12 +28,20 @@ func main() {
 	// 3일 저점,종가,고가 평균 연산 후 상태값 저장
 	go autoTrading2.Reset()
 
+	// 매일 8시 55분 매수체결 대기가 계속 걸려 있을시 그날의 매수체결 대기 삭제
+	// TODO : 이거 테스트 해봐야함
+	go autoTrading2.DeleteWaitMarket()
+
+	// 고점의 종가 -1%에서 매도
+	//go autoTrading2.Handler()
+
 	socketOpenTicker := time.NewTicker(time.Second * 2)
 
 	go func() {
 		for {
 			select {
-			// 소켓 시세 수신
+
+			// 초기화된 데이터 지정가 매수 체결 대기 걸기
 			case <-socketOpenTicker.C:
 
 				conn := connect.Socket(config.Ticker)
@@ -68,31 +78,36 @@ func main() {
 								continue
 							}
 
-							// 저점의 평균에서 매수
 							// 호가 계산
 
-							fmt.Println(ticker.Code)
-							fmt.Println(info)
+							{
 
-							//if ticker.Code == "KRW-STORJ" {
-							//	fmt.Println(info)
-							//	fmt.Println("진입")
-							//	bidPrice, bidVolume := autoTrading2.SetBidPriceAndVolume(info)
-							//	coin := orders.Market(ticker.Code)
-							//	coin.BidMarketLimit(bidPrice, bidVolume)
-							//	fmt.Println(bidPrice, bidVolume)
-							//}
+								// 저점의 평균 에서 지정가 매수 체결 대기
+								bidPrice, bidVolume := autoTrading2.SetBidPriceAndVolume(info)
+								coin := orders.Market(ticker.Code)
 
-							// 고점의 종가 -1%에서 매도
-							//go autoTrading2.Handler()
+								orderId := coin.BidMarketLimit(bidPrice, bidVolume)
+
+								// 주문 ID WaitMarket map 에 상태값 저장
+								if orderId != nil {
+
+									fmt.Println(ticker.Code)
+									fmt.Println(info)
+
+									fmt.Println(ticker.Code, "매수대기 체결", bidPrice)
+
+									delete(autoTrading2.PreviousMarketInfo, ticker.Code)
+									autoTrading2.PreviousMarketMutex.Unlock()
+									continue
+								}
+
+							}
 
 							// 손절도 정해야함
 
 						}
-
-						//
-
-						delete(autoTrading2.PreviousMarketInfo, ticker.Code)
+						// 아직 조건이 만족하지 않은 마켓들은 계속 모니터링
+						//delete(autoTrading2.PreviousMarketInfo, ticker.Code)
 
 					}
 					autoTrading2.PreviousMarketMutex.Unlock()

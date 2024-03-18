@@ -17,3 +17,10 @@ type Response400Error struct {
 		Message string `json:"message"`
 	} `json:"error"`
 }
+
+type Response404Error struct {
+	Error struct {
+		Name    string `json:"name"`
+		Message string `json:"message"`
+	} `json:"error"`
+}
