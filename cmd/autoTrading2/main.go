@@ -25,7 +25,6 @@ func main() {
 	go autoTrading2.LimitOrder()
 
 	// 매일 8시 55분 매수체결 대기가 계속 걸려 있을시 그날의 매수체결 대기 삭제
-	// TODO : 이거 테스트 해봐야함
 	go autoTrading2.DeleteWaitMarket()
 
 	// 고점의 종가 -1%에서 매도

@@ -26,7 +26,6 @@ func DeleteWaitMarket() {
 			waitList := orders.WaitList()
 			wl := *waitList
 
-			// TODO : 이거 확안
 			year, month, day := time.Now().Add(-9 * time.Hour).Date()
 
 			for _, value := range wl {

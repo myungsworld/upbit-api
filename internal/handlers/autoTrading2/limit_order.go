@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math"
 	"upbit-api/config"
+	"upbit-api/internal/api/orders"
 	"upbit-api/internal/connect"
 	"upbit-api/internal/models"
 )
@@ -32,10 +33,6 @@ func LimitOrder() {
 			PreviousMarketMutex.Lock()
 			if info, ok := PreviousMarketInfo[ticker.Code]; ok {
 
-				if ticker.Code == "KRW-ATOM" {
-					fmt.Println(info)
-				}
-
 				// opening Price(시작가) 가 저점의 평균보다 낮으면 매수 안함 ( 오늘 갑자기 많이 내려간 경우 혹은 어제 많이 내려서 마감한 경우)
 				// opening Price 가 고점의 평균보다 높으면 매수 안함 ( 오늘 갑자기 많이 올라온 경우 혹은 어제 많이 올라서 마감한 경우)
 				if info.LowAverage > info.OpeningPrice || info.HighAverage < info.OpeningPrice {
@@ -56,27 +53,25 @@ func LimitOrder() {
 
 					// 호가 계산
 
-					//{
-					//
-					//	// 저점의 평균 에서 지정가 매수 체결 대기
-					//	bidPrice, bidVolume := SetBidPriceAndVolume(info)
-					//	coin := orders.Market(ticker.Code)
-					//
-					//	traded := coin.BidMarketLimit(bidPrice, bidVolume)
-					//
-					//	if traded {
-					//
-					//		fmt.Println(ticker.Code)
-					//		fmt.Println(info)
-					//
-					//		delete(PreviousMarketInfo, ticker.Code)
-					//		PreviousMarketMutex.Unlock()
-					//		continue
-					//	}
-					//
-					//}
+					{
 
-					// 손절도 정해야함
+						// 저점의 평균 에서 지정가 매수 체결 대기
+						bidPrice, bidVolume := SetBidPriceAndVolume(info)
+						coin := orders.Market(ticker.Code)
+
+						traded := coin.BidMarketLimit(bidPrice, bidVolume)
+
+						if traded {
+
+							fmt.Println(ticker.Code)
+							fmt.Println(info)
+
+							delete(PreviousMarketInfo, ticker.Code)
+							PreviousMarketMutex.Unlock()
+							continue
+						}
+
+					}
 
 				}
 				// 아직 조건이 만족하지 않은 마켓들은 계속 모니터링
