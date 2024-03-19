@@ -12,11 +12,11 @@ import (
 func Reset() {
 
 	//// 매일 9시 티커 설정
-	//now := time.Now()
+	now := time.Now()
 	//
-	//resetTime := now.Truncate(24 * time.Hour).Add(time.Hour * 24).Add(time.Second)
+	resetTime := now.Truncate(24 * time.Hour).Add(time.Hour * 24).Add(time.Second)
 	//
-	//setTicker = time.NewTicker(resetTime.Sub(now))
+	//setTicker := time.NewTicker(resetTime.Sub(now))
 
 	setTicker := time.NewTicker(time.Second)
 	missingMarket := make(chan string, 200)
@@ -71,13 +71,12 @@ func Reset() {
 			}
 
 			//// 매일 9시 티커 설정
-			//now := time.Now()
-			//
-			//resetTime := now.Truncate(24 * time.Hour).Add(time.Hour * 24).Add(time.Second)
-			//
-			//setTicker = time.NewTicker(resetTime.Sub(now))
+			now = time.Now()
 
-			setTicker = time.NewTicker(time.Second * 60)
+			resetTime = now.Truncate(24 * time.Hour).Add(time.Hour * 24).Add(time.Second)
+
+			setTicker = time.NewTicker(resetTime.Sub(now))
+
 			log.Println("데이터 초기화 끝")
 
 		}

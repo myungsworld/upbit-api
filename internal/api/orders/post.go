@@ -1,6 +1,7 @@
 package orders
 
 import (
+	"fmt"
 	"upbit-api/internal/api"
 	"upbit-api/internal/models"
 )
@@ -47,7 +48,7 @@ func (m Market) AskMarketPrice(volume string) {
 }
 
 // BidMarketLimit 지정가 매수 주문
-func (m Market) BidMarketLimit(bidPrice, bidVolume string) *string {
+func (m Market) BidMarketLimit(bidPrice, bidVolume string) bool {
 
 	if resp := api.Request("https://api.upbit.com/v1/orders", models.LimitOrder{
 		Market:  string(m),
@@ -59,12 +60,15 @@ func (m Market) BidMarketLimit(bidPrice, bidVolume string) *string {
 
 		switch resp.(type) {
 		case *models.RespOrder:
-			uuid := resp.(*models.RespOrder).Uuid
-			return &uuid
+			fmt.Println(string(m), "매수대기 체결", bidPrice)
+			return true
+		case *models.Response400Error:
+			fmt.Println(string(m), "주문금액 부족으로 인해 해당코인 비활성화")
+			return true
 		}
 
 	}
 
-	return nil
+	return false
 
 }

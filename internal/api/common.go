@@ -53,6 +53,9 @@ func Request(endPoint string, body interface{}) interface{} {
 		case models.OrderList:
 			method = http.MethodGet
 			requestBody.Set("state", order.State)
+			for _, state := range order.States {
+				requestBody.Add("states", state)
+			}
 		case models.CancelOrder:
 			method = http.MethodDelete
 			//requestBody.Set("identifier",order.Identifier)
@@ -133,8 +136,13 @@ func respHandler(endPoint string, resp *http.Response) interface{} {
 		}
 
 	case 400:
-		fmt.Println(string(respBody))
-		return nil
+		switch {
+		case strings.Contains(string(respBody), "insufficient_funds_bid"):
+			respCode = &models.Response400Error{}
+		default:
+			panic(string(respBody))
+			return nil
+		}
 
 	case 401:
 		log.Fatalf("err: %d , %v", resp.StatusCode, string(respBody))
