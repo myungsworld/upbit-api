@@ -16,9 +16,9 @@ func Reset() {
 	//
 	resetTime := now.Truncate(24 * time.Hour).Add(time.Hour * 24).Add(time.Second)
 	//
-	//setTicker := time.NewTicker(resetTime.Sub(now))
+	setTicker := time.NewTicker(resetTime.Sub(now))
 
-	setTicker := time.NewTicker(time.Second)
+	//setTicker := time.NewTicker(time.Second)
 	missingMarket := make(chan string, 200)
 
 	for {

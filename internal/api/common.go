@@ -52,6 +52,7 @@ func Request(endPoint string, body interface{}) interface{} {
 			requestBody.Set("ord_type", order.OrdType)
 		case models.OrderList:
 			method = http.MethodGet
+			requestBody.Set("market", order.Market)
 			requestBody.Set("state", order.State)
 			for _, state := range order.States {
 				requestBody.Add("states", state)

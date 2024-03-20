@@ -52,6 +52,7 @@ func getBiggestFallenCoin() (string, float64) {
 		if !ok {
 
 			if config.ExceptMarkets(ticker.Code) {
+			} else if ticker.MarketWarning == "CAUTION" {
 			} else {
 				tickers[ticker.Code] = ticker
 				arrTickers = append(arrTickers, ticker)

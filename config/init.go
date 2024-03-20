@@ -86,6 +86,8 @@ func getAvailableCoins() {
 		if coin.Market[0:3] == "KRW" {
 			// 아래 코인 가격이 너무 낮아 변동률이 커서 제외 및 신규 코인 제외
 			if ExceptMarkets(coin.Market) {
+				// 유의 종목 제외
+			} else if coin.MarketWarning == "CAUTION" {
 			} else {
 				Markets = append(Markets, coin.Market)
 			}

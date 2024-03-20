@@ -1,6 +1,7 @@
 package autoTrading2
 
 import (
+	"log"
 	"time"
 	"upbit-api/internal/api/orders"
 )
@@ -26,6 +27,8 @@ func DeleteWaitMarket() {
 			waitList := orders.WaitList()
 			wl := *waitList
 
+			log.Println("매수체결 대기 초기화 시작")
+
 			year, month, day := time.Now().Add(-9 * time.Hour).Date()
 
 			for _, value := range wl {
@@ -46,6 +49,7 @@ func DeleteWaitMarket() {
 				startTime = startTime.Add(24 * time.Hour)
 				duration = startTime.Sub(time.Now())
 			}
+
 			deleteTicker = time.NewTicker(duration)
 
 		}

@@ -22,8 +22,9 @@ func WaitList() *[]models.RespOrder {
 // 체결 완료 리스트
 func GetTodayDoneList() *[]models.RespOrder {
 	result := api.Request(api.OrderEndPoint, models.OrderList{
-		State: "cancel",
-		//States: []string{"cancel"},
+		Market: "KRW-IQ",
+		State:  "done",
+		States: []string{"done"},
 	})
 
 	switch result.(type) {

@@ -27,7 +27,23 @@ func AskCoin() {
 
 func AveragingDown() {
 
-	averagingDownTicker := time.NewTicker(time.Hour * 6)
+	nowHour := time.Now().Hour()
+	now := time.Now()
+	resetTime := time.Now().Truncate(time.Hour * 24).Add(time.Hour * -9)
+
+	// 00시, 06시, 12시, 18시 기준으로 구매
+	switch {
+	case 0 < nowHour && nowHour < 6:
+		resetTime = resetTime.Add(time.Hour * 6)
+	case 6 < nowHour && nowHour < 12:
+		resetTime = resetTime.Add(time.Hour * 12)
+	case 12 < nowHour && nowHour < 18:
+		resetTime = resetTime.Add(time.Hour * 18)
+	case 18 < nowHour && nowHour < 24:
+		resetTime = resetTime.Add(time.Hour * 24)
+	}
+
+	averagingDownTicker := time.NewTicker(resetTime.Sub(now))
 
 	for {
 		select {
@@ -85,17 +101,14 @@ func askCoinHandler() {
 		// 손익 퍼센트 계산
 		fluctuationRate := (ticker.TradePrice/myAvgPrice)*100 - 100
 
-		// -9 퍼가 넘을시 다시 매수
-		//if fluctuationRate < -12 {
-		//	coin := orders.Market(ticker.Code)
-		//	coin.BidMarketPrice(constants.AutoTradingBidPrice)
-		//	log.Print(coin, fmt.Sprintf(" %0.2f%% 매수", fluctuationRate))
-		//}
-
 		// 12 퍼 이상 수익률 나면 메세지 보내기
 
-		// TODO : 아직 이걸 못정하겠음
+		// 20퍼 이상 오른 경우 매도
 		if fluctuationRate > 20 {
+			// (비트코인 제외)
+			if ticker.Code == "KRW-BTC" {
+				continue
+			}
 			coin := orders.Market(ticker.Code)
 			coin.AskMarketPrice(account.Balance)
 			log.Print(coin, fmt.Sprintf(" %0.2f%% 매도", fluctuationRate))
