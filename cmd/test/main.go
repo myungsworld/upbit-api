@@ -1,10 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
 	"upbit-api/config"
+	"upbit-api/internal/api/orders"
 )
 
 func main() {
@@ -14,13 +16,13 @@ func main() {
 
 	//setTicker := time.NewTicker(resetTime.Sub(now))
 
-	//list := orders.GetTodayDoneList()
+	list := orders.GetTodayDoneList()
 
-	//l := *list
+	l := *list
 
-	//for _, value := range l {
-	//	fmt.Println(value)
-	//}
+	for _, value := range l {
+		fmt.Println(value)
+	}
 
 	//orders.Cancel("734c8058-40b4-41bf-b7e8-6c4893f41c3c")
 
