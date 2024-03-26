@@ -1,6 +1,7 @@
 package orders
 
 import (
+	"fmt"
 	"upbit-api/internal/api"
 	"upbit-api/internal/models"
 )
@@ -35,4 +36,17 @@ func GetTodayDoneList() *[]models.RespOrder {
 	}
 
 	return nil
+}
+
+func Get(uuid string) {
+	result := api.Request(api.OrderDeleteEndPoint, models.GetOrder{
+		Uuid: uuid,
+	})
+
+	switch result.(type) {
+	case *models.RespOrder:
+		fmt.Println(result.(*models.RespOrder))
+	default:
+		panic("아님")
+	}
 }

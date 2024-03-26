@@ -5,6 +5,10 @@ import (
 	"time"
 )
 
+type GetOrder struct {
+	Uuid string `json:"uuid"`
+}
+
 type AskOrder struct {
 	Market  string `json:"market" binding:"required" example:"KRW-BTC"` // 마켓 ID
 	OrdType string `json:"ord_type"`

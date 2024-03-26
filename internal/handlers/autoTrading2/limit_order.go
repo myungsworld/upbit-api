@@ -7,6 +7,7 @@ import (
 	"upbit-api/config"
 	"upbit-api/internal/api/orders"
 	"upbit-api/internal/connect"
+	"upbit-api/internal/datastore"
 	"upbit-api/internal/models"
 )
 
@@ -55,16 +56,41 @@ func LimitOrder() {
 
 					{
 
+						fmt.Println(ticker.Code)
+						fmt.Println(info)
+
 						// 저점의 평균 에서 지정가 매수 체결 대기
 						bidPrice, bidVolume := SetBidPriceAndVolume(info)
 						coin := orders.Market(ticker.Code)
 
 						traded := coin.BidMarketLimit(bidPrice, bidVolume)
 
-						if traded {
+						switch traded {
+						// 실패
+						case "-1":
+							panic("에러 발생")
+						// 주문 금액 부족
+						case "0":
+							delete(PreviousMarketInfo, ticker.Code)
+							PreviousMarketMutex.Unlock()
+							continue
 
-							fmt.Println(ticker.Code)
-							fmt.Println(info)
+						// 매수 성공
+						default:
+							// 상태값 데이터베이스 업데이트
+							bidWaiting := models.BidWaiting{
+								Uuid:            traded,
+								Ticker:          ticker.Code,
+								BidPrice:        bidPrice,
+								BidVolume:       bidVolume,
+								LowTradeGap:     info.LowTradeGap,
+								CloseTradingGap: info.CloseTradingGap,
+								HighTradeGap:    info.HighTradeGap,
+							}
+
+							if err = datastore.DB.Create(&bidWaiting).Error; err != nil {
+								panic(err)
+							}
 
 							delete(PreviousMarketInfo, ticker.Code)
 							PreviousMarketMutex.Unlock()

@@ -5,6 +5,7 @@ import (
 	"os/signal"
 	"syscall"
 	"upbit-api/config"
+	"upbit-api/internal/datastore"
 	"upbit-api/internal/handlers/autoTrading2"
 )
 
@@ -24,6 +25,9 @@ func main() {
 	// 초기화된 데이터 지정가 매수 체결 대기 걸기
 	go autoTrading2.LimitOrder()
 
+	// 매수가 되었다면 매도 대기 걸기
+	//go autoTrading2.AskOrder()
+
 	// 매일 8시 55분 매수체결 대기가 계속 걸려 있을시 그날의 매수체결 대기 삭제
 	go autoTrading2.DeleteWaitMarket()
 
@@ -36,4 +40,5 @@ func main() {
 
 func init() {
 	config.Init()
+	datastore.ConnectDB()
 }

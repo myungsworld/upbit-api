@@ -34,6 +34,9 @@ func Request(endPoint string, body interface{}) interface{} {
 	case OrderEndPoint, OrderDeleteEndPoint:
 		method = http.MethodPost
 		switch order := body.(type) {
+		case models.GetOrder:
+			method = http.MethodGet
+			requestBody.Add("uuid", order.Uuid)
 		case models.BidOrder:
 			requestBody.Set("price", order.Price)
 			requestBody.Set("market", order.Market)
@@ -82,6 +85,8 @@ func Request(endPoint string, body interface{}) interface{} {
 		case models.BidOrder, models.AskOrder, models.LimitOrder, models.OrderList, models.CancelOrder:
 			b, _ := json.Marshal(&order)
 			req, err = http.NewRequest(method, endPoint, bytes.NewBuffer(b))
+		case models.GetOrder:
+			req, err = http.NewRequest(method, fmt.Sprintf("%s?%s", endPoint, requestBody.Encode()), nil)
 		}
 	}
 
@@ -110,6 +115,8 @@ func respHandler(endPoint string, resp *http.Response) interface{} {
 	if err != nil {
 		panic(err)
 	}
+
+	fmt.Println(resp.Request.Method)
 
 	var respCode interface{}
 
