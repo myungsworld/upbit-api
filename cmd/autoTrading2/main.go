@@ -18,7 +18,7 @@ func main() {
 	stopChan := make(chan os.Signal, 1)
 	signal.Notify(stopChan, os.Interrupt, syscall.SIGTERM)
 
-	// 금일 기준 데이터가 데이터베이스에 들어가있지 않은 경우 기입 ( 프로그램이 멈추고 난후 매수나 매도가 일어난 경우 )
+	//TODO: 금일 기준 데이터가 데이터베이스에 들어가있지 않은 경우 기입 ( 프로그램이 멈추고 난후 매수나 매도가 일어난 경우 )
 
 	// 1일마다 리셋 ( 한국시각 9시 1초 )
 	// 3일 저점,종가,고가 평균 연산 후 상태값 저장
@@ -30,7 +30,7 @@ func main() {
 	// 매수가 되었다면 매도 대기 걸기
 	go autoTrading2.AskOrder()
 
-	// 매도가 되었다면 데이터베이스 저장
+	//TODO: 매도가 되었다면 데이터베이스 저장
 
 	// 매일 8시 55분 매수체결 대기가 계속 걸려 있을시 그날의 매수체결 대기 삭제
 	go autoTrading2.DeleteWaitMarket()

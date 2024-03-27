@@ -85,7 +85,8 @@ func AskOrder() {
 								panic(err)
 							}
 
-							if flow.Id != 0 {
+							if flow.Id != 0 && flow.AskWaitingUuid == "" {
+
 								log.Println(flow.Ticker, " 매도대기열 진입")
 
 								// 지정가 매도 생성
