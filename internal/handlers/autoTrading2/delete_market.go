@@ -45,7 +45,6 @@ func DeleteWaitMarket() {
 				if err := datastore.DB.Model(&trading).Update("w_deleted_at", time.Now()).Error; err != nil {
 					panic(err)
 				}
-
 			}
 
 			log.Println("매수체결 대기 초기화 끝")
@@ -56,6 +55,19 @@ func DeleteWaitMarket() {
 			BidLimitUuidMutex.Unlock()
 			log.Println("매수 uuid 데이터 초기화 끝")
 
+			time.Sleep(time.Second)
+
+			log.Println("매도대기열 초기화 시작")
+			for _, trading := range flow {
+				// 매도 대기열이 있을시에
+				if trading.AskWaitingUuid != "" {
+					orders.Cancel(trading.AskWaitingUuid)
+					if err := datastore.DB.Model(&trading).Update("aw_deleted_at", time.Now()).Error; err != nil {
+						panic(err)
+					}
+				}
+			}
+			log.Println("매도대기열 초기화 끝")
 			now = time.Now()
 			startTime = time.Date(now.Year(), now.Month(), now.Day(), 8, 55, 00, 0, now.Location())
 			duration = startTime.Sub(time.Now())
