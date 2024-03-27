@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
 	"upbit-api/internal/models"
 )
 
@@ -22,10 +21,10 @@ func ConnectDB() {
 	)
 
 	dbConfig := &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Info),
+		//Logger: logger.Default.LogMode(logger.Info),
 	}
 
-	fmt.Println(dsn)
+	//fmt.Println(dsn)
 
 	DB, err = gorm.Open(mysql.Open(dsn), dbConfig)
 
@@ -39,7 +38,7 @@ func ConnectDB() {
 
 func updateDB() {
 	tables := []interface{}{
-		(*models.BidWaiting)(nil),
+		(*models.AutoTrading2)(nil),
 	}
 
 	if err := DB.AutoMigrate(tables...); err != nil {

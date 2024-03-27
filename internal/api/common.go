@@ -55,14 +55,12 @@ func Request(endPoint string, body interface{}) interface{} {
 			requestBody.Set("ord_type", order.OrdType)
 		case models.OrderList:
 			method = http.MethodGet
-			requestBody.Set("market", order.Market)
 			requestBody.Set("state", order.State)
 			for _, state := range order.States {
 				requestBody.Add("states", state)
 			}
 		case models.CancelOrder:
 			method = http.MethodDelete
-			//requestBody.Set("identifier",order.Identifier)
 			requestBody.Set("uuid", order.Uuid)
 		}
 
@@ -82,10 +80,10 @@ func Request(endPoint string, body interface{}) interface{} {
 		req, err = http.NewRequest(method, endPoint, nil)
 	} else {
 		switch order := body.(type) {
-		case models.BidOrder, models.AskOrder, models.LimitOrder, models.OrderList, models.CancelOrder:
+		case models.BidOrder, models.AskOrder, models.LimitOrder, models.CancelOrder:
 			b, _ := json.Marshal(&order)
 			req, err = http.NewRequest(method, endPoint, bytes.NewBuffer(b))
-		case models.GetOrder:
+		case models.GetOrder, models.OrderList:
 			req, err = http.NewRequest(method, fmt.Sprintf("%s?%s", endPoint, requestBody.Encode()), nil)
 		}
 	}
@@ -116,8 +114,6 @@ func respHandler(endPoint string, resp *http.Response) interface{} {
 		panic(err)
 	}
 
-	fmt.Println(resp.Request.Method)
-
 	var respCode interface{}
 
 	switch resp.StatusCode {
@@ -145,7 +141,11 @@ func respHandler(endPoint string, resp *http.Response) interface{} {
 
 	case 400:
 		switch {
+		// 매수 체결 금액 부족
 		case strings.Contains(string(respBody), "insufficient_funds_bid"):
+			respCode = &models.Response400Error{}
+		// 매도 체결 금액 부족
+		case strings.Contains(string(respBody), "insufficient_funds_ask"):
 			respCode = &models.Response400Error{}
 		default:
 			panic(string(respBody))

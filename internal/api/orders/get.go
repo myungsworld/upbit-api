@@ -21,9 +21,8 @@ func WaitList() *[]models.RespOrder {
 }
 
 // 체결 완료 리스트
-func GetTodayDoneList() *[]models.RespOrder {
+func GetDoneList() *[]models.RespOrder {
 	result := api.Request(api.OrderEndPoint, models.OrderList{
-		Market: "KRW-IQ",
 		State:  "done",
 		States: []string{"done"},
 	})

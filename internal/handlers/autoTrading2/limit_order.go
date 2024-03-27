@@ -2,8 +2,8 @@ package autoTrading2
 
 import (
 	"encoding/json"
-	"fmt"
 	"math"
+	"time"
 	"upbit-api/config"
 	"upbit-api/internal/api/orders"
 	"upbit-api/internal/connect"
@@ -34,6 +34,14 @@ func LimitOrder() {
 			PreviousMarketMutex.Lock()
 			if info, ok := PreviousMarketInfo[ticker.Code]; ok {
 
+				//TODO : 시간이 새벽 6시 이후인 경우에는 매수체결 안검
+				// 이유 : 초기화까지 3시간도 안남아서 굳이 할 필요가 없다고 느끼기 때문
+				//if time.Now().UTC().Hour() >= 21 {
+				//	delete(PreviousMarketInfo, ticker.Code)
+				//	PreviousMarketMutex.Unlock()
+				//	continue
+				//}
+
 				// opening Price(시작가) 가 저점의 평균보다 낮으면 매수 안함 ( 오늘 갑자기 많이 내려간 경우 혹은 어제 많이 내려서 마감한 경우)
 				// opening Price 가 고점의 평균보다 높으면 매수 안함 ( 오늘 갑자기 많이 올라온 경우 혹은 어제 많이 올라서 마감한 경우)
 				if info.LowAverage > info.OpeningPrice || info.HighAverage < info.OpeningPrice {
@@ -56,8 +64,8 @@ func LimitOrder() {
 
 					{
 
-						fmt.Println(ticker.Code)
-						fmt.Println(info)
+						//fmt.Println(ticker.Code)
+						//fmt.Println(info)
 
 						// 저점의 평균 에서 지정가 매수 체결 대기
 						bidPrice, bidVolume := SetBidPriceAndVolume(info)
@@ -78,17 +86,18 @@ func LimitOrder() {
 						// 매수 성공
 						default:
 							// 상태값 데이터베이스 업데이트
-							bidWaiting := models.BidWaiting{
-								Uuid:            traded,
+							flow := models.AutoTrading2{
+								WaitingUuid:     traded,
 								Ticker:          ticker.Code,
 								BidPrice:        bidPrice,
 								BidVolume:       bidVolume,
 								LowTradeGap:     info.LowTradeGap,
 								CloseTradingGap: info.CloseTradingGap,
 								HighTradeGap:    info.HighTradeGap,
+								WCreatedAt:      time.Now(),
 							}
 
-							if err = datastore.DB.Create(&bidWaiting).Error; err != nil {
+							if err = datastore.DB.Create(&flow).Error; err != nil {
 								panic(err)
 							}
 

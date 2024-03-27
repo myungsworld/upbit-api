@@ -12,13 +12,13 @@ import (
 func Reset() {
 
 	//// 매일 9시 티커 설정
-	//now := time.Now()
-	////
-	//resetTime := now.Truncate(24 * time.Hour).Add(time.Hour * 24).Add(time.Second)
-	////
-	//setTicker := time.NewTicker(resetTime.Sub(now))
+	now := time.Now()
+	//
+	resetTime := now.Truncate(24 * time.Hour).Add(time.Hour * 24).Add(time.Second)
+	//
+	setTicker := time.NewTicker(resetTime.Sub(now))
 
-	setTicker := time.NewTicker(time.Second)
+	//setTicker := time.NewTicker(time.Second)
 	missingMarket := make(chan string, 200)
 
 	for {
@@ -49,10 +49,6 @@ func Reset() {
 			// 지난 n일의 저점과 고점의 평균을 구함 ( 하루동안 상태값으로 남겨놓음 )
 
 			for _, market := range config.Markets {
-
-				//if market != "KRW-MANA" && market != "KRW-CRO" {
-				//	continue
-				//}
 
 				//API 갯수 제한
 				time.Sleep(50 * time.Millisecond)

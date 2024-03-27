@@ -72,13 +72,15 @@ type OrderList struct {
 }
 
 type RespOrder struct {
-	Uuid      string    `json:"uuid"` // 주문 고유 아이디
-	Side      string    `json:"side"` // 주문 종류
-	OrdType   string    `json:"ord_type"`
-	Price     string    `json:"price"` // 주문 당시 화페 가격
-	State     string    `json:"state"`
-	Market    string    `json:"market"`
-	CreatedAt time.Time `json:"created_at"`
+	Uuid           string    `json:"uuid"` // 주문 고유 아이디
+	Side           string    `json:"side"` // 주문 종류
+	OrdType        string    `json:"ord_type"`
+	Price          string    `json:"price"` // 주문 당시 화페 가격
+	State          string    `json:"state"`
+	Market         string    `json:"market"`
+	Volume         string    `json:"volume"`          // 사용자가 입력한 주문 양
+	ExecutedVolume string    `json:"executed_volume"` // 체결된 양
+	CreatedAt      time.Time `json:"created_at"`
 }
 
 type CancelOrder struct {
