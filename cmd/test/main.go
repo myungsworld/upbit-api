@@ -1,14 +1,15 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"os"
 	"os/signal"
 	"strconv"
 	"syscall"
+	"time"
 	"upbit-api/config"
+	"upbit-api/internal/api/orders"
 	"upbit-api/internal/datastore"
-	"upbit-api/internal/handlers/autoTrading2"
 	"upbit-api/internal/models"
 )
 
@@ -17,39 +18,54 @@ func main() {
 	stopChan := make(chan os.Signal, 1)
 	signal.Notify(stopChan, os.Interrupt, syscall.SIGTERM)
 
-	flows := make([]models.AutoTrading2, 0)
+	log.Println("매도된 데이터 데이터베이스 저장 시작")
+	orderList := *orders.GetDoneList()
 
-	if err := datastore.DB.Model(&models.AutoTrading2{}).
-		Where("w_deleted_at is null").
-		Find(&flows).Error; err != nil {
-		panic(err)
-	}
+	for _, order := range orderList {
 
-	for _, flow := range flows {
-		lowHighGap := flow.HighTradeGap - flow.LowTradeGap - 1
-		askPercent := lowHighGap/100 + 1
-		fmt.Println("--", flow.Ticker, "--")
-		bidFloat, _ := strconv.ParseFloat(flow.BidPrice, 64)
-		askFloat := bidFloat * askPercent
-		fmt.Println(flow.BidPrice, flow.HighTradeGap, flow.LowTradeGap)
-		fmt.Println(lowHighGap/100 + 1)
+		// 오늘인 경우
+		now := time.Now().UTC()
+		startOfDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
+		endOfDay := time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 0, time.UTC)
 
-		fmt.Println(flow.BidPrice)
-		fmt.Println(bidFloat)
+		if order.CreatedAt.UTC().UnixNano() > startOfDay.UnixNano() && order.CreatedAt.UTC().UnixNano() < endOfDay.UnixNano() {
 
-		fmt.Println(bidFloat * askPercent)
+			// 지정가 매도가 되었다면
+			if order.Side == "ask" && order.OrdType == "limit" {
 
-		fmt.Println(autoTrading2.SetAskPrice(askFloat))
+				flow := models.AutoTrading2{}
+				if err := datastore.DB.Model(&models.AutoTrading2{}).
+					Where("ticker = ?", order.Market).
+					Where("aw_created_at BETWEEN ? AND ?", startOfDay, endOfDay).
+					Find(&flow).Error; err != nil {
+					panic(err)
+				}
 
-		fmt.Println("--")
+				// 기입이 안되어 있을때 (중복 방지)
+				if flow.AskUuid == "" && flow.Id != 0 {
+					price, _ := strconv.ParseFloat(order.Price, 64)
+					volume, _ := strconv.ParseFloat(order.ExecutedVolume, 64)
+					fee, _ := strconv.ParseFloat(order.PaidFee, 64)
 
-		askPrice := autoTrading2.SetAskPrice(askFloat)
+					// 매도된 금액
+					askAmount := int(price*volume - fee)
 
-		if err := datastore.DB.Model(&flow).
-			Update("ask_price", askPrice).Error; err != nil {
-			panic(err)
+					updating := map[string]interface{}{
+						"ask_uuid":     order.Uuid,
+						"ask_amount":   strconv.Itoa(askAmount),
+						"a_created_at": time.Now(),
+					}
+
+					if err := datastore.DB.Model(&flow).
+						Updates(updating).Error; err != nil {
+						panic(err)
+					}
+					log.Println(order.Market, "매도체결 데이터 데이터베이스 저장")
+				}
+
+			}
+
 		}
-
 	}
 
 	<-stopChan

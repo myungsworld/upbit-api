@@ -12,6 +12,7 @@ type AutoTrading2 struct {
 	WaitingUuid     string    `json:"waiting_uuid"`
 	BidPrice        string    `json:"bid_price"`
 	BidVolume       string    `json:"bid_volume"`
+	BidAmount       string    `json:"bid_amount"`
 	LowTradeGap     float64   `json:"low_trade_gap"`     // 저가 - 종가 차이
 	CloseTradingGap float64   `json:"close_trading_gap"` // 종가평균 대비 현재가
 	HighTradeGap    float64   `json:"high_trade_gap"`    // 고가 - 종가 차이
@@ -32,4 +33,9 @@ type AutoTrading2 struct {
 	AskVolume      string    `json:"ask_volume"`
 	AwCreatedAt    time.Time `json:"aw_created_at" gorm:"default:null;"`
 	AwDeletedAt    time.Time `json:"aw_deleted_at" gorm:"default:null;"`
+
+	// 매도 데이터
+	AskUuid    string    `json:"ask_uuid"`
+	AskAmount  string    `json:"ask_amount"`
+	ACreatedAt time.Time `json:"a_created_at"`
 }

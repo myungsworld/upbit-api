@@ -60,8 +60,12 @@ func DeleteWaitMarket() {
 			log.Println("매도대기열 초기화 시작")
 			for _, trading := range flow {
 				// 매도 대기열이 있을시에
+
 				if trading.AskWaitingUuid != "" {
 					orders.Cancel(trading.AskWaitingUuid)
+					//TODO : 매수가 된 코인들도 8시 55분에 다 팔려면 아래 주석 제거
+					//coin := orders.Market(trading.Ticker)
+					//coin.AskMarketPrice(trading.ExecutedVolume)
 					if err := datastore.DB.Model(&trading).Update("aw_deleted_at", time.Now()).Error; err != nil {
 						panic(err)
 					}

@@ -80,6 +80,7 @@ type RespOrder struct {
 	Market         string    `json:"market"`
 	Volume         string    `json:"volume"`          // 사용자가 입력한 주문 양
 	ExecutedVolume string    `json:"executed_volume"` // 체결된 양
+	PaidFee        string    `json:"paid_fee"`        // 사용된 수수료
 	CreatedAt      time.Time `json:"created_at"`
 }
 

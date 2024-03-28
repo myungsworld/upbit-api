@@ -3,6 +3,7 @@ package autoTrading2
 import (
 	"encoding/json"
 	"math"
+	"strconv"
 	"time"
 	"upbit-api/config"
 	"upbit-api/internal/api/orders"
@@ -91,6 +92,7 @@ func LimitOrder() {
 								Ticker:          ticker.Code,
 								BidPrice:        bidPrice,
 								BidVolume:       bidVolume,
+								BidAmount:       strconv.Itoa(amount),
 								LowTradeGap:     info.LowTradeGap,
 								CloseTradingGap: info.CloseTradingGap,
 								HighTradeGap:    info.HighTradeGap,
