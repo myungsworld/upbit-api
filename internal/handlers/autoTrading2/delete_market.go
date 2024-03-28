@@ -60,9 +60,8 @@ func DeleteWaitMarket() {
 
 			log.Println("매도대기열 초기화 시작")
 			for _, trading := range flow {
-				// 매도 대기열이 있을시에
-
-				if trading.AskWaitingUuid != "" {
+				// 매도 대기열이 있고 매도가 되지 않은 경우
+				if trading.AskWaitingUuid != "" && trading.AskUuid == "" {
 					orders.Cancel(trading.AskWaitingUuid)
 					// 55분에 매수가 되었는데 매도가에 도달하지 않은 경우 일괄 판매 후 데이터베이스 저장
 					coin := orders.Market(trading.Ticker)
