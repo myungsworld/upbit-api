@@ -37,15 +37,17 @@ func GetDoneList() *[]models.RespOrder {
 	return nil
 }
 
-func Get(uuid string) {
+func Get(uuid string) *models.RespOrder {
 	result := api.Request(api.OrderDeleteEndPoint, models.GetOrder{
 		Uuid: uuid,
 	})
 
 	switch result.(type) {
 	case *models.RespOrder:
-		fmt.Println(result.(*models.RespOrder))
+		return result.(*models.RespOrder)
 	default:
-		panic("아님")
+		fmt.Println(result)
+		return nil
 	}
+
 }

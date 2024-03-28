@@ -38,13 +38,22 @@ func (m Market) BidMarketPrice(amount string) {
 }
 
 // AskMarketPrice 시장가 매도
-func (m Market) AskMarketPrice(volume string) {
-	api.Request("https://api.upbit.com/v1/orders", models.AskOrder{
+func (m Market) AskMarketPrice(volume string) string {
+	if resp := api.Request("https://api.upbit.com/v1/orders", models.AskOrder{
 		Market:  string(m),
 		OrdType: marketPriceSell,
 		Volume:  volume,
 		Side:    sell,
-	})
+	}); resp != nil {
+		switch resp.(type) {
+		case *models.RespOrder:
+			uuid := resp.(*models.RespOrder).Uuid
+			return uuid
+		default:
+			return "시장가 매도"
+		}
+	}
+	return "시장가 매도"
 }
 
 // BidMarketLimit 지정가 매수 주문

@@ -2,6 +2,7 @@ package autoTrading2
 
 import (
 	"log"
+	"strconv"
 	"time"
 	"upbit-api/internal/api/orders"
 	"upbit-api/internal/datastore"
@@ -63,11 +64,32 @@ func DeleteWaitMarket() {
 
 				if trading.AskWaitingUuid != "" {
 					orders.Cancel(trading.AskWaitingUuid)
-					//TODO : 매수가 된 코인들도 8시 55분에 다 팔려면 아래 주석 제거
-					//coin := orders.Market(trading.Ticker)
-					//coin.AskMarketPrice(trading.ExecutedVolume)
-					if err := datastore.DB.Model(&trading).Update("aw_deleted_at", time.Now()).Error; err != nil {
-						panic(err)
+					// 55분에 매수가 되었는데 매도가에 도달하지 않은 경우 일괄 판매 후 데이터베이스 저장
+					coin := orders.Market(trading.Ticker)
+					uuid := coin.AskMarketPrice(trading.ExecutedVolume)
+
+					order := orders.Get(uuid)
+					if order != nil {
+
+						price, _ := strconv.ParseFloat(order.Price, 64)
+						volume, _ := strconv.ParseFloat(order.ExecutedVolume, 64)
+						fee, _ := strconv.ParseFloat(order.PaidFee, 64)
+
+						// 매도된 금액
+						askAmount := int(price*volume - fee)
+
+						updating := map[string]interface{}{
+							"ask_uuid":      uuid,
+							"ask_amount":    askAmount,
+							"aw_deleted_at": order.CreatedAt,
+						}
+
+						if err := datastore.DB.Model(&trading).Updates(updating).Error; err != nil {
+							panic(err)
+						}
+
+					} else {
+						log.Println("8시 55분 매수가 된 코인들 시장가 판매시 문제")
 					}
 				}
 			}
