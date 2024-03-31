@@ -37,5 +37,5 @@ type AutoTrading2 struct {
 	// 매도 데이터
 	AskUuid    string    `json:"ask_uuid"`
 	AskAmount  string    `json:"ask_amount"`
-	ACreatedAt time.Time `json:"a_created_at"`
+	ACreatedAt time.Time `json:"a_created_at" gorm:"default:null;"`
 }
