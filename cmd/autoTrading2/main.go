@@ -34,7 +34,7 @@ func main() {
 	// 매도가 되었다면 데이터베이스 저장
 	go autoTrading2.AskCheck()
 
-	// 매일 8시 55분 매수체결 대기가 계속 걸려 있을시 그날의 매수체결 대기 삭제
+	// 매일 8시 55분 매수체결대기와 매도체결대기가 계속 걸려 있을시 그날의 매수체결 대기 삭제 및 매도되지 않은 데이터 일괄 시장가 매도
 	go autoTrading2.DeleteWaitMarket()
 
 	<-stopChan
