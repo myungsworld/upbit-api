@@ -5,6 +5,8 @@ import (
 	"os/signal"
 	"syscall"
 	"upbit-api/config"
+	"upbit-api/internal/api/orders"
+	"upbit-api/internal/datastore"
 )
 
 func main() {
@@ -12,17 +14,7 @@ func main() {
 	stopChan := make(chan os.Signal, 1)
 	signal.Notify(stopChan, os.Interrupt, syscall.SIGTERM)
 
-	//setTicker := time.NewTicker(resetTime.Sub(now))
-
-	//list := orders.GetTodayDoneList()
-
-	//l := *list
-
-	//for _, value := range l {
-	//	fmt.Println(value)
-	//}
-
-	//orders.Cancel("734c8058-40b4-41bf-b7e8-6c4893f41c3c")
+	orders.Get("4ab91eae-fbf6-4e05-b577-e54a5a5cd538")
 
 	<-stopChan
 
@@ -31,4 +23,5 @@ func main() {
 // .env 로드 , Market 상태 수집
 func init() {
 	config.Init()
+	datastore.ConnectDB()
 }

@@ -1,6 +1,7 @@
 package orders
 
 import (
+	"fmt"
 	"upbit-api/internal/api"
 	"upbit-api/internal/models"
 )
@@ -20,9 +21,8 @@ func WaitList() *[]models.RespOrder {
 }
 
 // 체결 완료 리스트
-func GetTodayDoneList() *[]models.RespOrder {
+func GetDoneList() *[]models.RespOrder {
 	result := api.Request(api.OrderEndPoint, models.OrderList{
-		Market: "KRW-IQ",
 		State:  "done",
 		States: []string{"done"},
 	})
@@ -35,4 +35,19 @@ func GetTodayDoneList() *[]models.RespOrder {
 	}
 
 	return nil
+}
+
+func Get(uuid string) *models.RespOrder {
+	result := api.Request(api.OrderDeleteEndPoint, models.GetOrder{
+		Uuid: uuid,
+	})
+
+	switch result.(type) {
+	case *models.RespOrder:
+		return result.(*models.RespOrder)
+	default:
+		fmt.Println(result)
+		return nil
+	}
+
 }

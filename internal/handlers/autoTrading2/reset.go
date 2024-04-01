@@ -50,10 +50,6 @@ func Reset() {
 
 			for _, market := range config.Markets {
 
-				//if market != "KRW-MANA" && market != "KRW-CRO" {
-				//	continue
-				//}
-
 				//API 갯수 제한
 				time.Sleep(50 * time.Millisecond)
 
@@ -71,9 +67,9 @@ func Reset() {
 			}
 
 			//// 매일 9시 티커 설정
-			now = time.Now()
+			now := time.Now()
 
-			resetTime = now.Truncate(24 * time.Hour).Add(time.Hour * 24).Add(time.Second)
+			resetTime := now.Truncate(24 * time.Hour).Add(time.Hour * 24).Add(time.Second)
 
 			setTicker = time.NewTicker(resetTime.Sub(now))
 

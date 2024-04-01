@@ -17,7 +17,7 @@ const (
 	// 시장가 주문(매도)
 	marketPriceSell = "market"
 	// 지정가 주문
-	marketLimitBuy = "limit"
+	marketLimit = "limit"
 
 	// 주문하기 URL
 	orderUrl = "https://api.upbit.com/v1/orders"
@@ -38,21 +38,30 @@ func (m Market) BidMarketPrice(amount string) {
 }
 
 // AskMarketPrice 시장가 매도
-func (m Market) AskMarketPrice(volume string) {
-	api.Request("https://api.upbit.com/v1/orders", models.AskOrder{
+func (m Market) AskMarketPrice(volume string) string {
+	if resp := api.Request("https://api.upbit.com/v1/orders", models.AskOrder{
 		Market:  string(m),
 		OrdType: marketPriceSell,
 		Volume:  volume,
 		Side:    sell,
-	})
+	}); resp != nil {
+		switch resp.(type) {
+		case *models.RespOrder:
+			uuid := resp.(*models.RespOrder).Uuid
+			return uuid
+		default:
+			return "시장가 매도"
+		}
+	}
+	return "시장가 매도"
 }
 
 // BidMarketLimit 지정가 매수 주문
-func (m Market) BidMarketLimit(bidPrice, bidVolume string) bool {
+func (m Market) BidMarketLimit(bidPrice, bidVolume string) string {
 
 	if resp := api.Request("https://api.upbit.com/v1/orders", models.LimitOrder{
 		Market:  string(m),
-		OrdType: marketLimitBuy,
+		OrdType: marketLimit,
 		Price:   bidPrice,
 		Side:    buy,
 		Volume:  bidVolume,
@@ -60,15 +69,46 @@ func (m Market) BidMarketLimit(bidPrice, bidVolume string) bool {
 
 		switch resp.(type) {
 		case *models.RespOrder:
+			uuid := resp.(*models.RespOrder).Uuid
 			fmt.Println(string(m), "매수대기 체결", bidPrice)
-			return true
+			return uuid
 		case *models.Response400Error:
 			fmt.Println(string(m), "주문금액 부족으로 인해 해당코인 비활성화")
-			return true
+			return "0"
+		default:
+			panic(resp)
+			return "-1"
 		}
 
 	}
 
-	return false
+	return "-1"
+}
 
+// 지정가 매도 주문
+func (m Market) AskMarketLimit(askPrice, askVolume string) string {
+
+	if resp := api.Request("https://api.upbit.com/v1/orders", models.LimitOrder{
+		Market:  string(m),
+		Side:    sell,
+		Volume:  askVolume,
+		Price:   askPrice,
+		OrdType: marketLimit,
+	}); resp != nil {
+		switch resp.(type) {
+		case *models.RespOrder:
+			uuid := resp.(*models.RespOrder).Uuid
+			fmt.Println(string(m), "매도대기 체결", askPrice)
+			return uuid
+		case *models.Response400Error:
+			fmt.Println(string(m), "매도대기 체결 금액 부족")
+			panic("매도 대기 체결 금액 부족")
+			return "0"
+		default:
+			panic(resp)
+			return "-1"
+		}
+	}
+
+	return "-1"
 }

@@ -127,3 +127,72 @@ func SetBidPriceAndVolume(info Info) (string, string) {
 
 	return bidPrice, volume
 }
+
+func SetAskPrice(askFloat float64) string {
+
+	var askPrice string
+
+	switch {
+	case askFloat < 1:
+		// TODO : 1원 미만일떄 뭐해야함?
+	// 현재가가 1원과 10원 사이인 코인
+	case 1 < askFloat && askFloat < 10:
+		askPrice = fmt.Sprintf("%0.3f", askFloat)
+
+	// 현재가가 10원과 100원 사이인 코인
+	case 10 <= askFloat && askFloat < 100:
+		switch {
+		// 저점 평균이 1원과 10원 사이인 경우
+		case 1 < askFloat && askFloat < 10:
+			askPrice = fmt.Sprintf("%0.3f", askFloat)
+		default:
+			askPrice = fmt.Sprintf("%0.2f", askFloat)
+		}
+	// 현재가가 100원과 1000원 사이인 코인
+	case 100 <= askFloat && askFloat < 1000:
+		switch {
+		// 저점 평균이 10원과 100원 사이인 경우
+		case 10 < askFloat && askFloat < 100:
+			askPrice = fmt.Sprintf("%0.2f", askFloat)
+		default:
+			askPrice = fmt.Sprintf("%0.1f", askFloat)
+		}
+
+	// 현재가가 1000원과 10000원 사이인 코인
+	case 1000 <= askFloat && askFloat < 10000:
+		switch {
+		// 저점 평균이 100원과 1000원 사이인 경우
+		case 100 < askFloat && askFloat < 1000:
+			askPrice = fmt.Sprintf("%0.1f", askFloat)
+		default:
+			askPrice = fmt.Sprintf("%d", int(askFloat))
+		}
+	// 현재가가 10000원과 50000원 사이인 코인
+	case 10000 <= askFloat && askFloat < 100000:
+		// 저점 평균이 1000원과 10000원사인 경우
+		switch {
+		case 1000 < askFloat && askFloat < 10000:
+			askPrice = fmt.Sprintf("%d", int(askFloat))
+		default:
+			askPrice = fmt.Sprintf("%d", int(askFloat)/10*10)
+		}
+
+	// 현재가가 50000원과 1000000원 사이인 코인
+	case 100000 <= askFloat && askFloat < 1000000:
+		switch {
+		case 10000 < askFloat && askFloat < 100000:
+			askPrice = fmt.Sprintf("%d", int(askFloat)/10*10)
+		default:
+			askPrice = fmt.Sprintf("%d", int(askFloat)/100*100)
+		}
+	case 1000000 <= askFloat:
+		switch {
+		case 100000 < askFloat && askFloat < 1000000:
+			askPrice = fmt.Sprintf("%d", int(askFloat)/100*100)
+		default:
+			askPrice = fmt.Sprintf("%d", int(askFloat)/1000*1000)
+		}
+	}
+
+	return askPrice
+}
