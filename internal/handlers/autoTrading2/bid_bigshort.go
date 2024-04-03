@@ -6,7 +6,7 @@ import (
 	"upbit-api/internal/middlewares"
 )
 
-func CheckList() {
+func BidBigShort() {
 
 	// 매 30분 마다
 	setTicker := middlewares.SetTimerEveryHourByMinute(30)

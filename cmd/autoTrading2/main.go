@@ -34,8 +34,8 @@ func main() {
 	// 매도가 되었다면 데이터베이스 저장
 	go autoTrading2.AskCheck()
 
-	// 3시 , 6시 폭락한 코인 매수
-	//go autoTrading2.()
+	//TODO: 3시 , 12시 현재가가 저점의 평균보다 낮은 코인 매수
+	//go autoTrading2.BidBigShort()
 
 	// 매일 8시 55분 매수체결대기와 매도체결대기가 계속 걸려 있을시 그날의 매수체결 대기 삭제 매도 체결대기는 매도가 될때까지 상태 유지
 	go autoTrading2.DeleteWaitMarket()
