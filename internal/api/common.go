@@ -82,6 +82,7 @@ func Request(endPoint string, body interface{}) interface{} {
 		switch order := body.(type) {
 		case models.BidOrder, models.AskOrder, models.LimitOrder, models.CancelOrder:
 			b, _ := json.Marshal(&order)
+			fmt.Println(string(b))
 			req, err = http.NewRequest(method, endPoint, bytes.NewBuffer(b))
 		case models.GetOrder, models.OrderList:
 			req, err = http.NewRequest(method, fmt.Sprintf("%s?%s", endPoint, requestBody.Encode()), nil)
@@ -110,7 +111,18 @@ func Request(endPoint string, body interface{}) interface{} {
 func respHandler(endPoint string, resp *http.Response) interface{} {
 
 	respBody, err := io.ReadAll(resp.Body)
+
 	if err != nil {
+
+		// TODO : 이게 무슨 케이스인지 알아야함
+		if strings.Contains(err.Error(), "server sent GOAWAY") {
+			fmt.Println("----")
+			fmt.Println("method:", resp.Request.Method, " url:", resp.Request.URL)
+			fmt.Println(err)
+			fmt.Println(resp)
+			fmt.Println("----")
+		}
+
 		panic(err)
 	}
 

@@ -1,8 +1,10 @@
 package autoTrading2
 
 import (
+	"fmt"
 	"log"
 	"strconv"
+	"strings"
 	"time"
 	"upbit-api/internal/api/orders"
 	"upbit-api/internal/datastore"
@@ -70,16 +72,23 @@ func DeleteWaitMarket() {
 					order := orders.Get(uuid)
 					if order != nil {
 
-						price, _ := strconv.ParseFloat(order.Price, 64)
-						volume, _ := strconv.ParseFloat(order.ExecutedVolume, 64)
-						fee, _ := strconv.ParseFloat(order.PaidFee, 64)
+						// fund 가져오기
+						fmt.Println("매도 데이터 확인")
+						fmt.Println(*order)
+						var integerFund int
 
-						// 매도된 금액
-						askAmount := int(price*volume - fee)
+						if strings.Contains(order.Trades[0].Funds, ".") {
+							fmt.Println(". 포함")
+							fund := strings.Split(order.Trades[0].Funds, ".")
+							integerFund, _ = strconv.Atoi(fund[0])
+						} else {
+							fmt.Println(". 미포함")
+							integerFund, _ = strconv.Atoi(order.Trades[0].Funds)
+						}
 
 						updating := map[string]interface{}{
 							"ask_uuid":      uuid,
-							"ask_amount":    askAmount,
+							"ask_amount":    integerFund,
 							"aw_deleted_at": order.CreatedAt,
 						}
 

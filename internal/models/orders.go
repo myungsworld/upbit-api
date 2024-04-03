@@ -82,6 +82,15 @@ type RespOrder struct {
 	ExecutedVolume string    `json:"executed_volume"` // 체결된 양
 	PaidFee        string    `json:"paid_fee"`        // 사용된 수수료
 	CreatedAt      time.Time `json:"created_at"`
+
+	// 개별 주문조회 데이터
+	Trades Trades `json:"trades"`
+}
+
+type Trades []struct {
+	Price  string `json:"price"`
+	Volume string `json:"volume"`
+	Funds  string `json:"funds"`
 }
 
 type CancelOrder struct {

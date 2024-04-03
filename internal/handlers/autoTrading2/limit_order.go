@@ -54,8 +54,8 @@ func LimitOrder() {
 				// 금일 시작가와 종가의 평균 편차가 0.5% 내외면 모니터링 진입
 				if math.Abs(info.CloseTradingGap) < 0.5 {
 
-					// 종가 평균과 고가 평균의 차이가 3퍼 내외인 경우는 제외
-					if (info.HighTradeGap - info.LowTradeGap) < 3 {
+					// 종가 평균과 고가 평균의 차이가 4퍼 내외인 경우는 제외
+					if (info.HighTradeGap - info.LowTradeGap) < 4 {
 						delete(PreviousMarketInfo, ticker.Code)
 						PreviousMarketMutex.Unlock()
 						continue

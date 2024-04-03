@@ -46,7 +46,10 @@ func Get(uuid string) *models.RespOrder {
 	case *models.RespOrder:
 		return result.(*models.RespOrder)
 	default:
+		fmt.Println("------")
+		fmt.Println("uuid 조회 정상적이지 않은 값")
 		fmt.Println(result)
+		fmt.Println("------")
 		return nil
 	}
 

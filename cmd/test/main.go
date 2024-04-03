@@ -1,8 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"os/signal"
+	"strconv"
+	"strings"
 	"syscall"
 	"upbit-api/config"
 	"upbit-api/internal/api/orders"
@@ -14,7 +17,28 @@ func main() {
 	stopChan := make(chan os.Signal, 1)
 	signal.Notify(stopChan, os.Interrupt, syscall.SIGTERM)
 
-	orders.Get("4ab91eae-fbf6-4e05-b577-e54a5a5cd538")
+	coin := orders.Market("KRW-MNT")
+	uuid := coin.AskMarketPrice("28.95193978")
+
+	order := orders.Get(uuid)
+	fmt.Println("-----")
+	fmt.Println(order)
+	fmt.Println("-----")
+	fmt.Println(order.Trades[0].Funds)
+
+	var integerFund int
+
+	if strings.Contains(order.Trades[0].Funds, ".") {
+		fmt.Println(". 포함")
+		fund := strings.Split(order.Trades[0].Funds, ".")
+		integerFund, _ = strconv.Atoi(fund[0])
+	} else {
+		fmt.Println(". 미포함")
+		integerFund, _ = strconv.Atoi(order.Trades[0].Funds)
+
+	}
+
+	fmt.Println(integerFund)
 
 	<-stopChan
 

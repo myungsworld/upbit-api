@@ -37,6 +37,9 @@ func main() {
 	// 매일 8시 55분 매수체결대기와 매도체결대기가 계속 걸려 있을시 그날의 매수체결 대기 삭제 및 매도되지 않은 데이터 일괄 시장가 매도
 	go autoTrading2.DeleteWaitMarket()
 
+	// previousMarketInfo 상태값에 어떤값이 들어있는지 확인
+	//go autoTrading2.CheckList()
+
 	<-stopChan
 
 }

@@ -12,13 +12,13 @@ import (
 func Reset() {
 
 	//// 매일 9시 티커 설정
-	now := time.Now()
-	//
-	resetTime := now.Truncate(24 * time.Hour).Add(time.Hour * 24).Add(time.Second)
-	//
-	setTicker := time.NewTicker(resetTime.Sub(now))
+	//now := time.Now()
+	////
+	//resetTime := now.Truncate(24 * time.Hour).Add(time.Hour * 24).Add(time.Second)
+	////
+	//setTicker := time.NewTicker(resetTime.Sub(now))
 
-	//setTicker := time.NewTicker(time.Second)
+	setTicker := time.NewTicker(time.Second)
 	missingMarket := make(chan string, 200)
 
 	for {
