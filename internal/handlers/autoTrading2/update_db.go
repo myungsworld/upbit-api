@@ -20,7 +20,7 @@ func UpdateDB() {
 			getOrders := *orders.GetDoneList()
 
 			for _, order := range getOrders {
-				// 시장가 매도인 경우 중
+				// 지정가 매도인 경우 중
 				if order.Side == "ask" && order.OrdType == "limit" {
 					flow := models.AutoTrading2{}
 					if err := datastore.DB.Model(&models.AutoTrading2{}).
