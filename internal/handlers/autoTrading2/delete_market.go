@@ -1,10 +1,7 @@
 package autoTrading2
 
 import (
-	"fmt"
 	"log"
-	"strconv"
-	"strings"
 	"time"
 	"upbit-api/internal/api/orders"
 	"upbit-api/internal/datastore"
@@ -58,50 +55,6 @@ func DeleteWaitMarket() {
 			BidLimitUuidMutex.Unlock()
 			log.Println("매수 uuid 데이터 초기화 끝")
 
-			time.Sleep(time.Second)
-
-			log.Println("매도대기열 초기화 시작")
-			for _, trading := range flow {
-				// 매도 대기열이 있고 매도가 되지 않은 경우
-				if trading.AskWaitingUuid != "" && trading.AskUuid == "" {
-					orders.Cancel(trading.AskWaitingUuid)
-					// 55분에 매수가 되었는데 매도가에 도달하지 않은 경우 일괄 판매 후 데이터베이스 저장
-					coin := orders.Market(trading.Ticker)
-					uuid := coin.AskMarketPrice(trading.ExecutedVolume)
-
-					order := orders.Get(uuid)
-					if order != nil {
-
-						// fund 가져오기
-						fmt.Println("매도 데이터 확인")
-						fmt.Println(*order)
-						var integerFund int
-
-						if strings.Contains(order.Trades[0].Funds, ".") {
-							fmt.Println(". 포함")
-							fund := strings.Split(order.Trades[0].Funds, ".")
-							integerFund, _ = strconv.Atoi(fund[0])
-						} else {
-							fmt.Println(". 미포함")
-							integerFund, _ = strconv.Atoi(order.Trades[0].Funds)
-						}
-
-						updating := map[string]interface{}{
-							"ask_uuid":      uuid,
-							"ask_amount":    integerFund,
-							"aw_deleted_at": order.CreatedAt,
-						}
-
-						if err := datastore.DB.Model(&trading).Updates(updating).Error; err != nil {
-							panic(err)
-						}
-
-					} else {
-						log.Println("8시 55분 매수가 된 코인들 시장가 판매시 문제")
-					}
-				}
-			}
-			log.Println("매도대기열 초기화 끝")
 			now = time.Now()
 			startTime = time.Date(now.Year(), now.Month(), now.Day(), 8, 55, 00, 0, now.Location())
 			duration = startTime.Sub(time.Now())

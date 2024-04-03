@@ -25,7 +25,7 @@ type AutoTrading2 struct {
 	RequestVolume  string    `json:"request_volume"`  // 사용자가 입력한 주문 양
 	ExecutedVolume string    `json:"executed_volume"` // 실제 체결된 양
 	BCreatedAt     time.Time `json:"b_created_at" gorm:"default:null;"`
-	BDeletedAt     time.Time `json:"b_deleted_at" gorm:"default:null;"`
+	//BDeletedAt     time.Time `json:"b_deleted_at" gorm:"default:null;"`
 
 	// 매도대기 데이터
 	AskWaitingUuid string    `json:"ask_waiting_uuid"`

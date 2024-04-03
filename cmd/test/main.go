@@ -2,14 +2,15 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"os/signal"
 	"strconv"
-	"strings"
 	"syscall"
 	"upbit-api/config"
 	"upbit-api/internal/api/orders"
 	"upbit-api/internal/datastore"
+	"upbit-api/internal/models"
 )
 
 func main() {
@@ -17,28 +18,46 @@ func main() {
 	stopChan := make(chan os.Signal, 1)
 	signal.Notify(stopChan, os.Interrupt, syscall.SIGTERM)
 
-	coin := orders.Market("KRW-MNT")
-	uuid := coin.AskMarketPrice("28.95193978")
+	getOrders := *orders.GetDoneList()
 
-	order := orders.Get(uuid)
-	fmt.Println("-----")
-	fmt.Println(order)
-	fmt.Println("-----")
-	fmt.Println(order.Trades[0].Funds)
+	for _, order := range getOrders {
+		// 시장가 매도인 경우 중
+		if order.Side == "ask" && order.OrdType == "limit" {
+			flow := models.AutoTrading2{}
+			if err := datastore.DB.Model(&models.AutoTrading2{}).
+				Where("ticker", order.Market).
+				Where("executed_volume", order.ExecutedVolume).
+				Find(&flow).Error; err != nil {
+				panic(err)
+			}
 
-	var integerFund int
+			// 해당되는 flow 가 있고 매도대기데이터가 있는 경우 매도 업데이트
+			if flow.Id != 0 && flow.AskWaitingUuid != "" && flow.AskUuid == "" {
+				log.Println(order.Market, "드디어 매도 체결;;")
+				price, _ := strconv.ParseFloat(order.Price, 64)
+				volume, _ := strconv.ParseFloat(order.ExecutedVolume, 64)
+				fee, _ := strconv.ParseFloat(order.PaidFee, 64)
 
-	if strings.Contains(order.Trades[0].Funds, ".") {
-		fmt.Println(". 포함")
-		fund := strings.Split(order.Trades[0].Funds, ".")
-		integerFund, _ = strconv.Atoi(fund[0])
-	} else {
-		fmt.Println(". 미포함")
-		integerFund, _ = strconv.Atoi(order.Trades[0].Funds)
+				// 매도된 금액
+				askAmount := int(price*volume - fee)
 
+				updating := map[string]interface{}{
+					"ask_uuid":     order.Uuid,
+					"ask_amount":   strconv.Itoa(askAmount),
+					"a_created_at": order.CreatedAt,
+				}
+
+				if err := datastore.DB.Model(&flow).
+					Updates(updating).Error; err != nil {
+					panic(err)
+				}
+
+			}
+
+		}
 	}
 
-	fmt.Println(integerFund)
+	fmt.Println("끗!")
 
 	<-stopChan
 
