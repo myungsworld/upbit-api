@@ -177,10 +177,14 @@ func respHandler(endPoint string, resp *http.Response) interface{} {
 		}
 	case 429:
 		respCode = &models.Response429Error{}
+
+	case 500:
+		fmt.Println(string(respBody))
+		fmt.Println(resp.Request)
+		respCode = &models.Response404Error{}
 	case 503:
 		fmt.Println(string(respBody))
 		respCode = &models.Response503Error{}
-
 	default:
 		log.Fatalf("err: %d , %v", resp.StatusCode, string(respBody))
 	}
