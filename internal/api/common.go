@@ -82,7 +82,6 @@ func Request(endPoint string, body interface{}) interface{} {
 		switch order := body.(type) {
 		case models.BidOrder, models.AskOrder, models.LimitOrder, models.CancelOrder:
 			b, _ := json.Marshal(&order)
-			fmt.Println(string(b))
 			req, err = http.NewRequest(method, endPoint, bytes.NewBuffer(b))
 		case models.GetOrder, models.OrderList:
 			req, err = http.NewRequest(method, fmt.Sprintf("%s?%s", endPoint, requestBody.Encode()), nil)
