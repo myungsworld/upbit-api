@@ -11,6 +11,7 @@ import (
 	"upbit-api/internal/api/orders"
 	"upbit-api/internal/connect"
 	"upbit-api/internal/constants"
+	"upbit-api/internal/middlewares"
 	"upbit-api/internal/models"
 )
 
@@ -27,30 +28,13 @@ func AskCoin() {
 
 func AveragingDown() {
 
-	nowHour := time.Now().Hour()
-
-	now := time.Now()
-	resetTime := time.Now().Truncate(time.Hour * 24).Add(time.Hour * -9)
-
-	// 00시, 06시, 12시, 18시 기준으로 구매
-	switch {
-	case 0 <= nowHour && nowHour < 6:
-		resetTime = resetTime.Add(time.Hour * 6)
-	case 6 <= nowHour && nowHour < 12:
-		resetTime = resetTime.Add(time.Hour * 12)
-	case 12 <= nowHour && nowHour < 18:
-		resetTime = resetTime.Add(time.Hour * 18)
-	case 18 <= nowHour && nowHour < 24:
-		resetTime = resetTime.Add(time.Hour * 24)
-	}
-
-	averagingDownTicker := time.NewTicker(resetTime.Sub(now))
+	averagingDownTicker := middlewares.SetTimerEvery6Hour()
 
 	for {
 		select {
 		case <-averagingDownTicker.C:
 			averagingDownHandler()
-			averagingDownTicker = time.NewTicker(time.Hour * 6)
+			averagingDownTicker = middlewares.SetTimerEvery6Hour()
 		}
 	}
 }
