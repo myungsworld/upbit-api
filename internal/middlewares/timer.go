@@ -1,7 +1,6 @@
 package middlewares
 
 import (
-	"fmt"
 	"time"
 )
 
@@ -29,8 +28,6 @@ func SetTimerEveryHourByMinute(min int) *time.Ticker {
 func SetTimerEvery6Hour() *time.Ticker {
 
 	nowHour := time.Now().UTC().Hour()
-
-	fmt.Println(nowHour)
 
 	now := time.Now()
 	resetTime := time.Now().UTC().Truncate(time.Hour * 24)

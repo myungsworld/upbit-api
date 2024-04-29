@@ -39,6 +39,7 @@ func ConnectDB() {
 func updateDB() {
 	tables := []interface{}{
 		(*models.AutoTrading2)(nil),
+		(*models.AutoTrading3)(nil),
 	}
 
 	if err := DB.AutoMigrate(tables...); err != nil {

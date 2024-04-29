@@ -3,13 +3,13 @@ package autoTrading2
 import (
 	"fmt"
 	"log"
-	"upbit-api/internal/middlewares"
+	"time"
 )
 
 func BidBigShort() {
 
-	// 매 30분 마다
-	setTicker := middlewares.SetTimerEveryHourByMinute(30)
+	setTicker := time.NewTicker(time.Minute * 3)
+
 	for {
 		select {
 		case <-setTicker.C:
@@ -21,7 +21,7 @@ func BidBigShort() {
 			}
 			PreviousMarketMutex.Unlock()
 			log.Println("--현재 돌아가고 있는 상태값 확인 끝--")
-			setTicker = middlewares.SetTimerEveryHourByMinute(30)
+
 		}
 	}
 

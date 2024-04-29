@@ -75,6 +75,10 @@ func (m Market) BidMarketLimit(bidPrice, bidVolume string) string {
 		case *models.Response400Error:
 			fmt.Println(string(m), "주문금액 부족으로 인해 해당코인 비활성화")
 			return "0"
+		case *models.Response429Error:
+			res := resp.(*models.Response429Error)
+			fmt.Println(res)
+			panic(res)
 		default:
 			panic(resp)
 			return "-1"
